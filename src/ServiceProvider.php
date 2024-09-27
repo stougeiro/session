@@ -26,5 +26,7 @@
         }
 
         public function terminate(): void
-        { }
+        {
+            flash()->clear();
+        }
     }
