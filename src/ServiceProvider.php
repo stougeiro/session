@@ -21,7 +21,9 @@
         }
 
         public function boot(): void
-        { }
+        {
+            session()->start();
+        }
 
         public function terminate(): void
         { }
