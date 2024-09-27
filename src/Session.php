@@ -12,7 +12,7 @@
         public function __construct(SessionHandlerInterface $handler)
         {
             if (session_status() == PHP_SESSION_DISABLED) {
-                throw new Error("Session not started because it's disabled.");
+                throw new Error("Session is disabled.");
             }
 
             /**
