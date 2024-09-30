@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aea84542cc4f1098e6bdbb9420316dc7",
+    "content-hash": "a0a1af1f63a6687fedaf854262b218d4",
     "packages": [
         {
             "name": "psr/container",
@@ -144,16 +144,16 @@
         },
         {
             "name": "stougeiro/session-contract",
-            "version": "v0.3.0",
+            "version": "v0.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stougeiro/session-contract.git",
-                "reference": "994e2abdc13927b896f2a240afb85949714f42bc"
+                "reference": "2fc2d02983fa81fcef1176454b83c86ba54593b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stougeiro/session-contract/zipball/994e2abdc13927b896f2a240afb85949714f42bc",
-                "reference": "994e2abdc13927b896f2a240afb85949714f42bc",
+                "url": "https://api.github.com/repos/stougeiro/session-contract/zipball/2fc2d02983fa81fcef1176454b83c86ba54593b0",
+                "reference": "2fc2d02983fa81fcef1176454b83c86ba54593b0",
                 "shasum": ""
             },
             "require": {
@@ -177,9 +177,9 @@
             ],
             "support": {
                 "issues": "https://github.com/stougeiro/session-contract/issues",
-                "source": "https://github.com/stougeiro/session-contract/tree/v0.3.0"
+                "source": "https://github.com/stougeiro/session-contract/tree/v0.3.1"
             },
-            "time": "2024-09-27T02:24:09+00:00"
+            "time": "2024-09-30T17:07:59+00:00"
         },
         {
             "name": "stougeiro/support",

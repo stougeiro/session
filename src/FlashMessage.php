@@ -35,7 +35,7 @@
             return $item['message'];
         }
 
-        public function set(string $key, mixed $message, int $age = 1): void
+        public function set(string $key, mixed $message, int $age = 1): FlashMessageInterface
         {
             $messages = $this->session->get($this->storage_id);
 
@@ -45,6 +45,8 @@
             ];
 
             $this->session->set($this->storage_id, $messages);
+
+            return $this;
         }
 
         public function exists(string $_key): bool
