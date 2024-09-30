@@ -17,6 +17,10 @@
         public function __construct(SessionInterface $session)
         {
             $this->session = $session;
+
+            if ( ! $this->session->exists($this->storage_id)) {
+                $this->session->set($this->storage_id, []);
+            }
         }
 
 
