@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "205f411d8af44678b19ff591a5b477f5",
+    "content-hash": "906e62620e18f8e2c7b1c456defd3f91",
     "packages": [
         {
             "name": "psr/container",
@@ -183,16 +183,16 @@
         },
         {
             "name": "stougeiro/support",
-            "version": "v0.1.0",
+            "version": "v0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stougeiro/support.git",
-                "reference": "6e4fce9b98b11df7cb09a4611c6b8cfcc5ad65f1"
+                "reference": "419c0e67336c42bd061caf9de4c153b2907b977a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stougeiro/support/zipball/6e4fce9b98b11df7cb09a4611c6b8cfcc5ad65f1",
-                "reference": "6e4fce9b98b11df7cb09a4611c6b8cfcc5ad65f1",
+                "url": "https://api.github.com/repos/stougeiro/support/zipball/419c0e67336c42bd061caf9de4c153b2907b977a",
+                "reference": "419c0e67336c42bd061caf9de4c153b2907b977a",
                 "shasum": ""
             },
             "require": {
@@ -216,9 +216,9 @@
             ],
             "support": {
                 "issues": "https://github.com/stougeiro/support/issues",
-                "source": "https://github.com/stougeiro/support/tree/v0.1.0"
+                "source": "https://github.com/stougeiro/support/tree/v0.2.0"
             },
-            "time": "2024-09-17T21:59:15+00:00"
+            "time": "2024-10-01T14:17:05+00:00"
         }
     ],
     "packages-dev": [],

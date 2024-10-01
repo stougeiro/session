@@ -21,6 +21,6 @@
         "php": "^8.1",
         "stougeiro/contract": "0.6.0",
         "stougeiro/session-contract": "0.3.1",
-        "stougeiro/support": "0.1.0"
+        "stougeiro/support": "0.2.0"
     }
 }
