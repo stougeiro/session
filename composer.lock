@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "906e62620e18f8e2c7b1c456defd3f91",
+    "content-hash": "e3b68ca6f1d5615c2addcd26449e4943",
     "packages": [
         {
             "name": "psr/container",
@@ -183,16 +183,16 @@
         },
         {
             "name": "stougeiro/support",
-            "version": "v0.2.0",
+            "version": "v0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stougeiro/support.git",
-                "reference": "419c0e67336c42bd061caf9de4c153b2907b977a"
+                "reference": "ea555f0b7de2103d3c778cb4ab9d1a0bf9bad41a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stougeiro/support/zipball/419c0e67336c42bd061caf9de4c153b2907b977a",
-                "reference": "419c0e67336c42bd061caf9de4c153b2907b977a",
+                "url": "https://api.github.com/repos/stougeiro/support/zipball/ea555f0b7de2103d3c778cb4ab9d1a0bf9bad41a",
+                "reference": "ea555f0b7de2103d3c778cb4ab9d1a0bf9bad41a",
                 "shasum": ""
             },
             "require": {
@@ -200,6 +200,9 @@
             },
             "type": "package",
             "autoload": {
+                "files": [
+                    "src/aliases.php"
+                ],
                 "psr-4": {
                     "STDW\\Support\\": "src/"
                 }
@@ -216,9 +219,9 @@
             ],
             "support": {
                 "issues": "https://github.com/stougeiro/support/issues",
-                "source": "https://github.com/stougeiro/support/tree/v0.2.0"
+                "source": "https://github.com/stougeiro/support/tree/v0.3.0"
             },
-            "time": "2024-10-01T14:17:05+00:00"
+            "time": "2024-10-03T14:05:44+00:00"
         }
     ],
     "packages-dev": [],
