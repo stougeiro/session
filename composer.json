@@ -32,7 +32,8 @@
         ]
     },
     "require": {
-        "php": ">=8.2"
+        "php": ">=8.2",
+        "stougeiro/session-contract": "^2.0"
     },
     "autoload-dev": {
         "psr-4": {
@@ -41,7 +42,7 @@
     },
     "require-dev": {
         "phpstan/phpstan": "^2.2",
-        "pestphp/pest": "^5.0"
+        "pestphp/pest": "^3.8"
     },
     "config": {
         "allow-plugins": {
