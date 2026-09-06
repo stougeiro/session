@@ -24,7 +24,7 @@
                 return $default;
             }
 
-            return $flash[$key];
+            return $flash[$key]['value'];
         }
 
         public function set(string $key, mixed $value): void
