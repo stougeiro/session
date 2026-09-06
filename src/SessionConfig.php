@@ -7,83 +7,91 @@
 
     class SessionConfig implements SessionConfigInterface
     {
-        protected array $config;
+        protected string $name;
+        protected string $storage;
+        protected array $cookie;
+        protected array $gc;
+        protected array $extra;
 
 
         public function __construct(array $config)
         {
-            $this->config = [
-                'name' => $this->validateName($config['name'] ?? null),
+            $name = $config['name'] ?? '';
+            $storage = $config['storage'] ?? '';
 
-                'storage' => $this->validateStorage($config['storage'] ?? null),
+            $this->name = $this->validateName($name);
+            $this->storage = $this->validateStorage($storage);
 
-                'cookie' => [
-                    'lifetime' => $this->validateInt($config['cookie']['lifetime'] ?? 0, min: 0),
-                    'secure' => $this->validateBool($config['cookie']['secure'] ?? false),
-                    'same_site' => $this->validateSameSite($config['cookie']['same_site'] ?? 'Lax'),
-                ],
+            $cookieLifetime = $config['cookie']['lifetime'] ?? 0;
+            $cookieSameSite = $config['cookie']['same_site'] ?? '';
 
-                'garbage_collector' => [
-                    'maxlifetime' => $this->validateInt($config['garbage_collector']['maxlifetime'] ?? 1800, min: 1),
-                    'probability' => $this->validateInt($config['garbage_collector']['probability'] ?? 1, min: 0),
-                    'divisor' => $this->validateInt($config['garbage_collector']['divisor'] ?? 100, min: 1),
-                ],
+            $this->cookie = [
+                'lifetime' => $this->validateInt($cookieLifetime, min: 0, max: 604800),
+                'same_site' => $this->validateSameSite($cookieSameSite),
+            ];
 
-                'extra' => [
-                    'regeneration' => $this->validateBool($config['extra']['regeneration'] ?? false),
-                    'regeneration_time' => $this->validateInt($config['extra']['regeneration_time'] ?? 900, min: 1),
-                ],
+            $gcMaxLifetime = $config['garbage_collector']['maxlifetime'] ?? 1200;
+            $gcProbability = $config['garbage_collector']['probability'] ?? 1;
+            $gcDivisor = $config['garbage_collector']['divisor'] ?? 100;
+
+            $this->gc = [
+                'maxlifetime' => $this->validateInt($gcMaxLifetime, min: 1, max: 1800),
+                'probability' => $this->validateInt($gcProbability, min: 1, max: 100),
+                'divisor' => $this->validateInt($gcDivisor, min: 1, max: 100),
+            ];
+
+            $regeneration = $config['extra']['regeneration'] ?? false;
+            $regenerationTime = $config['extra']['regeneration_time'] ?? 600;
+
+            $this->extra = [
+                'regeneration' => $this->validateBool($regeneration),
+                'regeneration_time' => $this->validateInt($regenerationTime, min: 1, max: 900),
             ];
         }
 
 
         public function name(): string
         {
-            return $this->config['name'];
+            return $this->name;
         }
 
         public function storage(): string
         {
-            return $this->config['storage'];
+            return $this->storage;
         }
 
         public function cookie(): array
         {
-            return $this->config['cookie'];
+            return $this->cookie;
         }
 
         public function gc(): array
         {
-            return $this->config['garbage_collector'];
+            return $this->gc;
         }
 
         public function extra(): array
         {
-            return $this->config['extra'];
+            return $this->extra;
         }
 
 
-        protected function validateName(?string $name): string
+        protected function validateName(string $name): string
         {
-            if (is_null($name) || ! preg_match('/^[A-Za-z0-9_-]+$/', $name)) {
-                return 'PHPSESSID';
+            if (preg_match('/^[A-Za-z0-9_-]+$/', $name)) {
+                return $name;
             }
 
-            return $name;
+            return 'PHPSESSID';
         }
 
-        protected function validateStorage(?string $path): string
+        protected function validateStorage(string $path): string
         {
-            if (
-                     is_null($path)
-                || ! is_string($path)
-                || ! is_dir($path)
-                || ! is_writable($path)
-            ) {
-                return $this->getDefaultSavePath();
+            if (is_dir($path) && is_writable($path)) {
+                return $path;
             }
 
-            return $path;
+            return $this->getDefaultSavePath();
         }
 
         protected function validateInt(int $value, ?int $min = null, ?int $max = null): int

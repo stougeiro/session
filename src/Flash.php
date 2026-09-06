@@ -24,12 +24,7 @@
                 return $default;
             }
 
-            $value = $flash[$key];
-
-            unset($flash[$key]);
-            $this->write($flash);
-
-            return $value;
+            return $flash[$key];
         }
 
         public function set(string $key, mixed $value): void
