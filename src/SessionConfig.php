@@ -2,8 +2,10 @@
 
     namespace STDW\Session;
 
+    use STDW\Contract\Session\SessionConfigInterface;
 
-    class SessionConfig
+
+    class SessionConfig implements SessionConfigInterface
     {
         protected array $config;
 
