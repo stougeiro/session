@@ -2,11 +2,12 @@
 
     namespace STDW\Session;
 
-    use STDW\Contract\Session\SessionConfigInterface;
+    use STDW\Session\Spec\SessionConfigInterface;
 
 
     class SessionConfig implements SessionConfigInterface
     {
+        protected string $handler;
         protected string $name;
         protected string $storage;
         protected array $cookie;
@@ -16,9 +17,11 @@
 
         public function __construct(array $config)
         {
+            $handler = $config['handler'] ?? '';
             $name = $config['name'] ?? '';
             $storage = $config['storage'] ?? '';
 
+            $this->handler = $this->validateHandler($handler);
             $this->name = $this->validateName($name);
             $this->storage = $this->validateStorage($storage);
 
@@ -50,6 +53,11 @@
         }
 
 
+        public function handler(): string
+        {
+            return $this->handler;
+        }
+
         public function name(): string
         {
             return $this->name;
@@ -75,6 +83,12 @@
             return $this->extra;
         }
 
+        protected function validateHandler(string $handler): string
+        {
+            $allowedHandlers = ['file', 'sqlite'];
+
+            return in_array($handler, $allowedHandlers, true) ? $handler : 'file';
+        }
 
         protected function validateName(string $name): string
         {
