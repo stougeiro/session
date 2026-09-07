@@ -8,10 +8,17 @@
 
     class SqliteSessionHandler implements SessionHandlerInterface
     {
+        /** @var PDO
+         */
         protected PDO $pdo;
+
+        /** @var string
+         */
         protected string $table = 'sessions';
 
 
+        /** @param string $path 
+         */
         public function __construct(string $path)
         {
             $database = rtrim($path, '/') . '/session.sqlite';
@@ -34,11 +41,20 @@
         }
 
 
+        /**
+         * @param string $path 
+         * @param string $name 
+         * @return bool 
+         */
         public function open(string $path, string $name): bool
         {
             return true;
         }
 
+        /**
+         * @param string $id 
+         * @return string|false 
+         */
         public function read(string $id): string|false
         {
             $stmt = $this->pdo->prepare("
@@ -53,6 +69,11 @@
             return $data ?: '';
         }
 
+        /**
+         * @param string $id 
+         * @param string $data 
+         * @return bool 
+         */
         public function write(string $id, string $data): bool
         {
             $stmt = $this->pdo->prepare("
@@ -67,6 +88,10 @@
             ]);
         }
 
+        /**
+         * @param int $max_lifetime 
+         * @return int|false 
+         */
         public function gc(int $max_lifetime): int|false
         {
             $limit = time() - $max_lifetime;
@@ -81,11 +106,17 @@
             return $stmt->rowCount();
         }
 
+        /** @return bool 
+         */
         public function close(): bool
         {
             return true;
         }
 
+        /**
+         * @param string $id 
+         * @return bool 
+         */
         public function destroy(string $id): bool
         {
             $stmt = $this->pdo->prepare("
@@ -97,6 +128,8 @@
         }
 
 
+        /** @return void 
+         */
         protected function createTable(): void
         {
             $sql = "

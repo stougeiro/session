@@ -27,6 +27,10 @@
         ];
 
 
+        /**
+         * @param SessionConfig $config 
+         * @throws RuntimeException 
+         */
         public function __construct(
             protected SessionConfig $config
         ) {
@@ -48,16 +52,27 @@
             $this->handleRegeneration();
         }
 
+        /** @return string 
+         */
         public function id(): string
         {
             return $this->getSessionId();
         }
 
+        /**
+         * @param string $key 
+         * @return bool 
+         */
         public function has(string $key): bool
         {
             return array_key_exists($key, $_SESSION);
         }
 
+        /**
+         * @param string $key 
+         * @param mixed $default 
+         * @return mixed 
+         */
         public function get(string $key, mixed $default = null): mixed
         {
             if (in_array($key, $this->reservedKeys, true)) {
@@ -67,6 +82,12 @@
             return $_SESSION[$key] ?? $default;
         }
 
+        /**
+         * @param string $key 
+         * @param mixed $value 
+         * @return void 
+         * @throws RuntimeException 
+         */
         public function set(string $key, mixed $value): void
         {
             if (in_array($key, $this->reservedKeys, true)) {
@@ -76,6 +97,11 @@
             $_SESSION[$key] = $value;
         }
 
+        /**
+         * @param string $key 
+         * @return void 
+         * @throws RuntimeException 
+         */
         public function remove(string $key): void
         {
             if (in_array($key, $this->reservedKeys, true)) {
@@ -85,6 +111,8 @@
             unset($_SESSION[$key]);
         }
 
+        /** @return void 
+         */
         public function clear(): void
         {
             $keys = array_keys($_SESSION);
@@ -98,6 +126,8 @@
             $_SESSION[self::KEY_LAST_ACTIVITY] = time();
         }
 
+        /** @return void 
+         */
         public function destroy(): void
         {
             if ($this->isSessionStatusActive()) {
@@ -106,26 +136,36 @@
         }
 
 
+        /** @return bool 
+         */
         protected function isSessionStatusDisabled(): bool
         {
             return session_status() === PHP_SESSION_DISABLED;
         }
 
+        /** @return bool 
+         */
         protected function isSessionStatusNone(): bool
         {
             return session_status() === PHP_SESSION_NONE;
         }
 
+        /** @return bool 
+         */
         protected function isSessionStatusActive(): bool
         {
             return session_status() === PHP_SESSION_ACTIVE;
         }
 
+        /** @return string 
+         */
         protected function getSessionId(): string
         {
             return session_id();
         }
 
+        /** @return void 
+         */
         protected function applyHandlerSettings(): void
         {
             $type = $this->config->handler();
@@ -141,6 +181,8 @@
             session_set_save_handler($handler, true);
         }
 
+        /** @return void 
+         */
         protected function applyIniSettings(): void
         {
             $name = $this->config->name();
@@ -163,6 +205,8 @@
             session_cache_limiter('nocache');
         }
 
+        /** @return void 
+         */
         protected function applyCookieSettings(): void
         {
             $cookie = $this->config->cookie();
@@ -177,6 +221,8 @@
             ]);
         }
 
+        /** @return void 
+         */
         protected function doSessionStart(): void
         {
             $this->applyHandlerSettings();
@@ -186,6 +232,8 @@
             session_start();
         }
 
+        /** @return void 
+         */
         protected function handleActivity(): void
         {
             $now = time();
@@ -201,6 +249,8 @@
             $_SESSION[self::KEY_LAST_ACTIVITY] = $now;
         }
 
+        /** @return void 
+         */
         protected function handleRegeneration(): void
         {
             $extra = $this->config->extra();
@@ -225,16 +275,22 @@
             }
         }
 
+        /** @return void 
+         */
         protected function doSessionRegenerateId(): void
         {
             session_regenerate_id(true);
         }
 
+        /** @return void 
+         */
         protected function doSessionDestroy(): void
         {
             session_destroy();
         }
 
+        /** @return bool 
+         */
         protected function isHttps(): bool
         {
             $https = $_SERVER['HTTPS'] ?? null;
@@ -243,6 +299,10 @@
             return ($port === 443) || ( ! empty($https) && $https !== 'off');
         }
 
+        /**
+         * @param string $sameSite 
+         * @return string 
+         */
         protected function resolveSameSite(string $sameSite): string
         {
             if ($sameSite === 'None' && ! $this->isHttps()) {

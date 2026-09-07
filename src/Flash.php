@@ -8,14 +8,23 @@
 
     class Flash implements FlashInterface
     {
+        /** @var string The reserved session key for storing flash messages.
+         */
         protected const FLASH_KEY = '__FLASH__';
 
 
+        /** @param SessionInterface $session 
+         */
         public function __construct(
             protected SessionInterface $session)
         { }
 
 
+        /**
+         * @param string $key 
+         * @param mixed $default 
+         * @return mixed 
+         */
         public function get(string $key, mixed $default = null): mixed
         {
             $flash = $this->read();
@@ -27,6 +36,11 @@
             return $flash[$key]['value'];
         }
 
+        /**
+         * @param string $key 
+         * @param mixed $value 
+         * @return void 
+         */
         public function set(string $key, mixed $value): void
         {
             $flash = $this->read();
@@ -38,6 +52,8 @@
             $this->write($flash);
         }
 
+        /** @return void 
+         */
         public function clear(): void
         {
             $flash = $this->read();
@@ -58,11 +74,17 @@
         }
 
 
+        /** @return array<string, mixed>
+         */
         protected function read(): array
         {
             return $this->session->get(self::FLASH_KEY, []);
         }
 
+        /**
+         * @param array<string, array{age: int, value: mixed}> $flash 
+         * @return void 
+         */
         protected function write(array $flash): void
         {
             $this->session->set(self::FLASH_KEY, $flash);
