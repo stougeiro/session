@@ -74,10 +74,11 @@
         }
 
 
-        /** @return array<string, mixed>
+        /** @return array<string, array{age: int, value: mixed}> 
          */
         protected function read(): array
         {
+            /** @var array<string, array{age: int, value: mixed}> */
             return $this->session->get(self::FLASH_KEY, []);
         }
 

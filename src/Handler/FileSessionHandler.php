@@ -43,19 +43,20 @@
             $file = $this->filePath($id);
 
             if ( ! is_file($file)) {
-                return '';
+                return false;
             }
 
             $fp = fopen($file, 'rb');
 
             if ( ! $fp) {
-                return '';
+                return false;
             }
 
             $data = stream_get_contents($fp);
+
             fclose($fp);
 
-            return $data ?: '';
+            return $data ?: false;
         }
 
         /**

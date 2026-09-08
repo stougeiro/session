@@ -64,9 +64,9 @@
 
             $stmt->execute(['id' => $id]);
 
-            $data = $stmt->fetchColumn();
+            $data = (string) $stmt->fetchColumn();
 
-            return $data ?: '';
+            return $data ?: false;
         }
 
         /**
