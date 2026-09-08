@@ -44,38 +44,48 @@
          */
         public function __construct(array $config)
         {
-            $handler = $config['handler'] ?? '';
-            $name = $config['name'] ?? '';
-            $storage = $config['storage'] ?? '';
+            $defaults = [
+                'handler' => 'file',
+                'name' => '',
+                'storage' => '',
 
-            $this->handler = $this->validateHandler($handler);
-            $this->name = $this->validateName($name);
-            $this->storage = $this->validateStorage($storage);
+                'cookie' => [
+                    'lifetime' => 0,
+                    'same_site' => 'Lax',
+                ],
 
-            $cookieLifetime = $config['cookie']['lifetime'] ?? 0;
-            $cookieSameSite = $config['cookie']['same_site'] ?? '';
+                'garbage_collector' => [
+                    'maxlifetime' => 1200,
+                    'probability' => 1,
+                    'divisor' => 100,
+                ],
+
+                'extra' => [
+                    'regeneration' => false,
+                    'regeneration_time' => 600,
+                ],
+            ];
+
+            $config = array_replace_recursive($defaults, $config);
+
+            $this->handler = $this->validateHandler($config['handler']);
+            $this->name = $this->validateName($config['name']);
+            $this->storage = $this->validateStorage($config['storage']);
 
             $this->cookie = [
-                'lifetime' => $this->validateInt($cookieLifetime, min: 0, max: 604800),
-                'same_site' => $this->validateSameSite($cookieSameSite),
+                'lifetime' => $this->validateInt($config['cookie']['lifetime'], min: 0, max: 604800),
+                'same_site' => $this->validateSameSite($config['cookie']['same_site']),
             ];
-
-            $gcMaxLifetime = $config['garbage_collector']['maxlifetime'] ?? 1200;
-            $gcProbability = $config['garbage_collector']['probability'] ?? 1;
-            $gcDivisor = $config['garbage_collector']['divisor'] ?? 100;
 
             $this->gc = [
-                'maxlifetime' => $this->validateInt($gcMaxLifetime, min: 1, max: 1800),
-                'probability' => $this->validateInt($gcProbability, min: 1, max: 100),
-                'divisor' => $this->validateInt($gcDivisor, min: 1, max: 100),
+                'maxlifetime' => $this->validateInt($config['garbage_collector']['maxlifetime'], min: 1, max: 1800),
+                'probability' => $this->validateInt($config['garbage_collector']['probability'], min: 1, max: 100),
+                'divisor' => $this->validateInt($config['garbage_collector']['divisor'], min: 1, max: 100),
             ];
 
-            $regeneration = $config['extra']['regeneration'] ?? false;
-            $regenerationTime = $config['extra']['regeneration_time'] ?? 600;
-
             $this->extra = [
-                'regeneration' => $this->validateBool($regeneration),
-                'regeneration_time' => $this->validateInt($regenerationTime, min: 1, max: 900),
+                'regeneration' => $this->validateBool($config['extra']['regeneration']),
+                'regeneration_time' => $this->validateInt($config['extra']['regeneration_time'], min: 1, max: 900),
             ];
         }
 
