@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+use Tests\Helpers\SessionTestHelper;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,7 +15,7 @@
 |
 */
 
-pest()->extend(Tests\TestCase::class)->in('Feature');
+pest()->extend(Tests\TestCase::class)->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -30,14 +34,54 @@ expect()->extend('toBeOne', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Functions
+| Global Helpers
 |--------------------------------------------------------------------------
 |
-| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
-| project that you don't want to repeat in every file. Here you can also expose helpers as
-| global functions to help you to reduce the number of lines of code in your test files.
+| Here you can expose global helpers to help reduce the number of lines of code
+| in your test files.
 |
 */
 
-function something()
-{ }
+uses(SessionTestHelper::class);
+
+function createTestSession(array $overrides = []): \STDW\Session\Session
+{
+    return (new class {
+        use SessionTestHelper;
+    })->createSession($overrides);
+}
+
+function createTestableSession(array $overrides = []): \Tests\Helpers\TestableSession
+{
+    return (new class {
+        use SessionTestHelper;
+    })->createTestableSession($overrides);
+}
+
+function createTestFlash(array $overrides = []): \STDW\Session\Flash
+{
+    return (new class {
+        use SessionTestHelper;
+    })->createFlash($overrides);
+}
+
+function createTestableFlash(array $overrides = []): \STDW\Session\Flash
+{
+    return (new class {
+        use SessionTestHelper;
+    })->createTestableFlash($overrides);
+}
+
+function tempDir(): string
+{
+    return (new class {
+        use SessionTestHelper;
+    })->getTempDir();
+}
+
+function cleanDir(string $dir): void
+{
+    (new class {
+        use SessionTestHelper;
+    })->cleanDir($dir);
+}
