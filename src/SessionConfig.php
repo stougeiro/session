@@ -19,20 +19,28 @@
          */
         protected string $storage;
 
-        /** @var array<string, mixed>
+        /** @var array{lifetime: int, same_site: 'Lax'|'Strict'|'None'} 
          */
         protected array $cookie;
 
-        /** @var array<string, mixed>
+        /** @var array{maxlifetime: int, probability: int, divisor: int}
          */
         protected array $gc;
 
-        /** @var array<string, mixed>
+        /** @var array{regeneration: bool, regeneration_time: int}
          */
         protected array $extra;
 
 
-        /** @param array $config 
+        /**
+         * @param array{
+         *    handler?: string,
+         *    name?: string,
+         *    storage?: string,
+         *    cookie?: array{lifetime?: int, same_site?: 'Lax'|'Strict'|'None'},
+         *    garbage_collector?: array{maxlifetime?: int, probability?: int, divisor?: int},
+         *    extra?: array{regeneration?: bool, regeneration_time?: int}
+         * } $config 
          */
         public function __construct(array $config)
         {
@@ -93,21 +101,21 @@
             return $this->storage;
         }
 
-        /** @return array<string, mixed> 
+        /** @return array{lifetime: int, same_site: 'Lax'|'Strict'|'None'} 
          */
         public function cookie(): array
         {
             return $this->cookie;
         }
 
-        /** @return array<string, mixed> 
+        /** @return array{maxlifetime: int, probability: int, divisor: int}
          */
         public function gc(): array
         {
             return $this->gc;
         }
 
-        /** @return array<string, mixed> 
+        /** @return array{regeneration: bool, regeneration_time: int}
          */
         public function extra(): array
         {
@@ -181,11 +189,12 @@
 
         /**
          * @param string $value 
-         * @return string 
+         * @return 'Lax'|'Strict'|'None' 
          */
         protected function validateSameSite(string $value): string
         {
             $allowed = ['Lax', 'Strict', 'None'];
+            $value = ucfirst(strtolower($value));
 
             return in_array($value, $allowed, true) ? $value : 'Lax';
         }

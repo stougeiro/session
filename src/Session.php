@@ -161,7 +161,7 @@
          */
         protected function getSessionId(): string
         {
-            return session_id();
+            return session_id() ?: '';
         }
 
         /** @return void 
@@ -193,9 +193,9 @@
 
             ini_set('session.save_path', $storage);
 
-            ini_set('session.gc_maxlifetime', (string) $gc['maxlifetime']);
-            ini_set('session.gc_probability', (string) $gc['probability']);
-            ini_set('session.gc_divisor', (string) $gc['divisor']);
+            ini_set('session.gc_maxlifetime', $gc['maxlifetime']);
+            ini_set('session.gc_probability', $gc['probability']);
+            ini_set('session.gc_divisor', $gc['divisor']);
 
             ini_set('session.use_strict_mode', '1');
             ini_set('session.use_cookies', '1');
@@ -260,7 +260,9 @@
             }
 
             $now = time();
-            $last = $_SESSION[self::KEY_LAST_REGENERATION] ?? null;
+            $last = isset($_SESSION[self::KEY_LAST_REGENERATION])
+                ? (int) $_SESSION[self::KEY_LAST_REGENERATION]
+                : null;
 
             if ($last === null) {
                 $_SESSION[self::KEY_LAST_REGENERATION] = $now;
