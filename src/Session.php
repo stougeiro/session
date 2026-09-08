@@ -3,6 +3,7 @@
     namespace STDW\Session;
 
     use STDW\Contract\Session\SessionInterface;
+    use STDW\Session\Spec\SessionConfigInterface;
     use STDW\Session\Handler\FileSessionHandler;
     use STDW\Session\Handler\SqliteSessionHandler;
 
@@ -20,11 +21,11 @@
 
 
         /**
-         * @param SessionConfig $config 
+         * @param SessionConfigInterface $config 
          * @throws RuntimeException 
          */
         public function __construct(
-            protected SessionConfig $config
+            protected SessionConfigInterface $config
         ) {
             if ($this->isSessionStatusDisabled()) {
                 throw new RuntimeException('Session is disabled in the current PHP configuration');
