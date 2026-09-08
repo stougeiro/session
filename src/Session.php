@@ -11,19 +11,11 @@
 
     class Session implements SessionInterface
     {
-        /** @var string The reserved session key for storing the last activity timestamp. 
-         */
-        protected const KEY_LAST_ACTIVITY = '_last_activity_';
-
-        /** @var string The reserved session key for storing the last regeneration timestamp. 
-         */
-        protected const KEY_LAST_REGENERATION = '_last_regeneration_';
-
         /** @var array<string> The reserved session keys that cannot be accessed or modified directly.
          */
         protected array $reservedKeys = [
-            self::KEY_LAST_ACTIVITY,
-            self::KEY_LAST_REGENERATION,
+            '_last_activity_',
+            '_last_regeneration_',
         ];
 
 
@@ -123,7 +115,7 @@
                 }
             }
 
-            $_SESSION[self::KEY_LAST_ACTIVITY] = time();
+            $this->setLastActivity(time());
         }
 
         /** @return void 
@@ -237,16 +229,15 @@
         protected function handleActivity(): void
         {
             $now = time();
+            $last = $this->getLastActivity();
             $timeout = $this->config->gc()['maxlifetime'];
 
-            $last = $_SESSION[self::KEY_LAST_ACTIVITY] ?? null;
-
-            if ($last !== null && ($now - $last) > $timeout) {
+            if (($now - $last) > $timeout) {
                 $this->doSessionDestroy();
                 $this->doSessionStart();
             }
 
-            $_SESSION[self::KEY_LAST_ACTIVITY] = $now;
+            $this->setLastActivity($now);
         }
 
         /** @return void 
@@ -260,20 +251,12 @@
             }
 
             $now = time();
-            $last = isset($_SESSION[self::KEY_LAST_REGENERATION])
-                ? (int) $_SESSION[self::KEY_LAST_REGENERATION]
-                : null;
-
-            if ($last === null) {
-                $_SESSION[self::KEY_LAST_REGENERATION] = $now;
-
-                return;
-            }
+            $last = $this->getLastRegeneration();
 
             if (($now - $last) > $extra['regeneration_time']) {
                 $this->doSessionRegenerateId();
 
-                $_SESSION[self::KEY_LAST_REGENERATION] = $now;
+                $this->setLastRegeneration($now);
             }
         }
 
@@ -302,8 +285,8 @@
         }
 
         /**
-         * @param string $sameSite 
-         * @return string 
+         * @param 'Lax'|'Strict'|'None' $sameSite 
+         * @return 'Lax'|'Strict'|'None' 
          */
         protected function resolveSameSite(string $sameSite): string
         {
@@ -312,5 +295,57 @@
             }
 
             return $sameSite;
+        }
+
+        /** @return int 
+         */
+        public function getLastActivity(): int
+        {
+            $last = $_SESSION['_last_activity_'] ?? 0;
+
+            if (is_int($last)) {
+                return $last;
+            }
+
+            if (is_numeric($last)) {
+                return (int) $last;
+            }
+
+            return 0;
+        }
+
+        /**
+         * @param int $time 
+         * @return void 
+         */
+        public function setLastActivity(int $time): void
+        {
+            $_SESSION['_last_activity_'] = $time;
+        }
+
+        /** @return int 
+         */
+        public function getLastRegeneration(): int
+        {
+            $last = $_SESSION['_last_regeneration_'] ?? 0;
+
+            if (is_int($last)) {
+                return $last;
+            }
+
+            if (is_numeric($last)) {
+                return (int) $last;
+            }
+
+            return 0;
+        }
+
+        /**
+         * @param int $time 
+         * @return void 
+         */
+        public function setLastRegeneration(int $time): void
+        {
+            $_SESSION['_last_regeneration_'] = $time;
         }
     }
