@@ -7,6 +7,7 @@
     use STDW\Session\Handler\FileSessionHandler;
     use STDW\Session\Handler\SqliteSessionHandler;
 
+    use SessionHandlerInterface;
     use RuntimeException;
 
 
@@ -14,7 +15,7 @@
     {
         /** @var array<string> The reserved session keys that cannot be accessed or modified directly.
          */
-        protected array $reservedKeys = [
+        private array $reservedKeys = [
             '_last_activity_',
             '_last_regeneration_',
         ];
@@ -161,15 +162,10 @@
          */
         protected function applyHandlerSettings(): void
         {
-            $type = $this->config->handler();
-            $path = $this->config->storage();
-
-            switch ($type) {
-                case 'sqlite':
-                    $handler = new SqliteSessionHandler($path); break;
-                default:
-                    $handler = new FileSessionHandler($path);
-            }
+            $handler = $this->createHandler(
+                $this->config->handler(),
+                $this->config->storage()
+            );
 
             session_set_save_handler($handler, true);
         }
@@ -223,6 +219,19 @@
             $this->applyCookieSettings();
 
             session_start();
+        }
+
+        /**
+         * @param string $type 
+         * @param string $path 
+         * @return SessionHandlerInterface 
+         */
+        protected function createHandler(string $type, string $path): SessionHandlerInterface
+        {
+            return match ($type) {
+                'sqlite' => new SqliteSessionHandler($path),
+                default  => new FileSessionHandler($path),
+            };
         }
 
         /** @return void 
@@ -282,7 +291,10 @@
             $https = $_SERVER['HTTPS'] ?? null;
             $port = $_SERVER['SERVER_PORT'] ?? null;
 
-            return ($port === 443) || ( ! empty($https) && $https !== 'off');
+            $isHttp = ($https !== null && (empty($https) || $https === 'off'))
+                   || ($port !== null && $port !== 443);
+
+            return ! $isHttp;
         }
 
         /**
