@@ -13,11 +13,9 @@
 
     class Session implements SessionInterface
     {
-        /** @var array<string> The reserved session keys that cannot be accessed or modified directly.
-         */
-        private array $reservedKeys = [
-            '_last_activity_',
-            '_last_regeneration_',
+        private const RESERVED_KEYS = [
+            '_last_activity_' => true,
+            '_last_regeneration_' => true,
         ];
 
 
@@ -69,7 +67,7 @@
          */
         public function get(string $key, mixed $default = null): mixed
         {
-            if (isset($this->reservedKeys[$key])) {
+            if (isset(self::RESERVED_KEYS[$key])) {
                 return $default;
             }
 
@@ -84,7 +82,7 @@
          */
         public function set(string $key, mixed $value): void
         {
-            if (isset($this->reservedKeys[$key])) {
+            if (isset(self::RESERVED_KEYS[$key])) {
                 throw new RuntimeException("Cannot write to reserved session key '{$key}'");
             }
 
@@ -98,7 +96,7 @@
          */
         public function remove(string $key): void
         {
-            if (isset($this->reservedKeys[$key])) {
+            if (isset(self::RESERVED_KEYS[$key])) {
                 throw new RuntimeException("Cannot remove reserved session key '{$key}'");
             }
 
@@ -110,7 +108,7 @@
         public function clear(): void
         {
             foreach ($_SESSION as $key => $_) {
-                if ( ! isset($this->reservedKeys[$key])) {
+                if ( ! isset(self::RESERVED_KEYS[$key])) {
                     unset($_SESSION[$key]);
                 }
             }

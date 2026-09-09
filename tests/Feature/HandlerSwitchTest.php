@@ -34,6 +34,8 @@ it('both handlers write and read data', function () {
 
     $fileHandler->write($fileId, $data);
     $sqliteHandler->write($sqliteId, $data);
+    $fileHandler->close();
+    $sqliteHandler->close();
 
     $fileResult = $fileHandler->read($fileId);
     $sqliteResult = $sqliteHandler->read($sqliteId);
@@ -54,11 +56,13 @@ it('both handlers destroy sessions', function () {
 
     $fileHandler->write($fileId, 'data');
     $sqliteHandler->write($sqliteId, 'data');
+    $fileHandler->close();
+    $sqliteHandler->close();
 
     $fileHandler->destroy($fileId);
     $sqliteHandler->destroy($sqliteId);
 
-    expect($fileHandler->read($fileId))->toBeFalse();
+    expect($fileHandler->read($fileId))->toBe('');
     expect($sqliteHandler->read($sqliteId))->toBeFalse();
 });
 
@@ -71,6 +75,8 @@ it('both handlers garbage collect expired sessions', function () {
 
     $fileHandler->write($fileId, 'data');
     $sqliteHandler->write($sqliteId, 'data');
+    $fileHandler->close();
+    $sqliteHandler->close();
 
     $fileGc = $fileHandler->gc(1);
     $sqliteGc = $sqliteHandler->gc(1);

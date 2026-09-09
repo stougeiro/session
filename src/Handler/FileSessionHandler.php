@@ -126,6 +126,8 @@
          */
         public function destroy(string $id): bool
         {
+            unset($this->cache[$id], $this->pending[$id]);
+
             $file = $this->filePath($id);
 
             if ( ! is_file($file)) {

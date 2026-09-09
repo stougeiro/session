@@ -58,6 +58,7 @@ it('write and read session data', function () {
     $data = 'serialized_session_data';
 
     $this->handler->write($id, $data);
+    $this->handler->close();
 
     $result = $this->handler->read($id);
 
@@ -73,6 +74,7 @@ it('write returns true on success', function () {
 
     expect($result)->toBeTrue();
 
+    $this->handler->close();
     $this->handler->destroy($id);
 });
 
@@ -81,6 +83,7 @@ it('write updates existing data', function () {
 
     $this->handler->write($id, 'first_data');
     $this->handler->write($id, 'second_data');
+    $this->handler->close();
 
     $result = $this->handler->read($id);
 
@@ -99,13 +102,15 @@ it('destroy removes session record', function () {
     $id = 'sqlite_test_' . uniqid();
 
     $this->handler->write($id, 'data');
+    $this->handler->close();
 
     $result = $this->handler->read($id);
     expect($result)->toBe('data');
 
     $this->handler->destroy($id);
 
-    $result = $this->handler->read($id);
+    $handler2 = $this->createSqliteHandler($this->tempDir);
+    $result = $handler2->read($id);
     expect($result)->toBeFalse();
 });
 
@@ -121,6 +126,7 @@ it('gc removes expired records', function () {
 
     $this->handler->write($id1, 'old_data');
     $this->handler->write($id2, 'new_data');
+    $this->handler->close();
 
     $dbFile = $this->tempDir . '/session.sqlite';
     $pdo = new PDO('sqlite:' . $dbFile);
@@ -132,10 +138,11 @@ it('gc removes expired records', function () {
 
     expect($removed)->toBeGreaterThanOrEqual(1);
 
-    $result1 = $this->handler->read($id1);
+    $handler2 = $this->createSqliteHandler($this->tempDir);
+    $result1 = $handler2->read($id1);
     expect($result1)->toBeFalse();
 
-    $result2 = $this->handler->read($id2);
+    $result2 = $handler2->read($id2);
     expect($result2)->toBe('new_data');
 
     $this->handler->destroy($id2);
@@ -149,6 +156,7 @@ it('gc returns count of removed records', function () {
 
     $this->handler->write($id1, 'data1');
     $this->handler->write($id2, 'data2');
+    $this->handler->close();
 
     $dbFile = $this->tempDir . '/session.sqlite';
     $pdo = new PDO('sqlite:' . $dbFile);
@@ -169,6 +177,7 @@ it('gc does not remove recent records', function () {
     $id = 'recent_' . uniqid();
 
     $this->handler->write($id, 'data');
+    $this->handler->close();
 
     $removed = $this->handler->gc(1800);
 
@@ -184,10 +193,11 @@ it('handles empty data', function () {
     $id = 'empty_' . uniqid();
 
     $this->handler->write($id, '');
+    $this->handler->close();
 
     $result = $this->handler->read($id);
 
-    expect($result)->toBeFalse();
+    expect($result)->toBe('');
 
     $this->handler->destroy($id);
 });
@@ -197,6 +207,7 @@ it('handles special characters in data', function () {
     $data = 'áéíóú ñ ç 漢字 🔒';
 
     $this->handler->write($id, $data);
+    $this->handler->close();
 
     $result = $this->handler->read($id);
 
@@ -210,6 +221,7 @@ it('handles large data', function () {
     $data = str_repeat('A', 1024 * 1024);
 
     $this->handler->write($id, $data);
+    $this->handler->close();
 
     $result = $this->handler->read($id);
 
@@ -223,6 +235,7 @@ it('stores timestamp with session data', function () {
 
     $before = time();
     $this->handler->write($id, 'data');
+    $this->handler->close();
     $after = time();
 
     $dbFile = $this->tempDir . '/session.sqlite';

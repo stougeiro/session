@@ -154,6 +154,8 @@
          */
         public function destroy(string $id): bool
         {
+            unset($this->cache[$id], $this->pending[$id]);
+
             $stmt = $this->pdo->prepare("
                 DELETE FROM {$this->table}
                 WHERE id = :id
