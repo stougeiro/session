@@ -15,9 +15,6 @@ It builds on top of PHP’s native session_start() and $_SESSION, but adds a cle
 
 ## ✨ Features
 
-- **[todo]**  
-  [todo]
-
 - **Drop‑in replacement for native PHP sessions**  
 Uses session_start() and $_SESSION, but with a predictable lifecycle and safer defaults.
 
