@@ -176,6 +176,8 @@
         {
             $name = $this->config->name();
             $storage = $this->config->storage();
+
+            /** @var array{maxlifetime: int, probability: int, divisor: int} $gc */
             $gc = $this->config->gc();
 
             ini_set('session.name', $name);
@@ -198,6 +200,7 @@
          */
         protected function applyCookieSettings(): void
         {
+            /** @var array{lifetime: int, same_site: 'Lax'|'Strict'|'None'} $cookie */
             $cookie = $this->config->cookie();
 
             session_set_cookie_params([
@@ -265,7 +268,6 @@
 
             if (($now - $last) > $extra['regeneration_time']) {
                 $this->doSessionRegenerateId();
-
                 $this->setLastRegeneration($now);
             }
         }
