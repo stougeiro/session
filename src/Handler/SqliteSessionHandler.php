@@ -16,11 +16,11 @@
          */
         protected string $table = 'sessions';
 
-        /** @var array<string, mixed>
+        /** @var array<string, string>
          */
         protected array $cache = [];
 
-        /** @var array<string, mixed>
+        /** @var array<string, string>
          */
         protected array $pending = [];
 
@@ -79,11 +79,14 @@
             $stmt->execute(['id' => $id]);
 
             $data = $stmt->fetchColumn();
-            $data = $data !== '' ? $data : false;
 
-            $this->cache[$id] = $data;
+            if ($data === false) {
+                return false;
+            }
 
-            return $data;
+            $this->cache[$id] = (string) $data;
+
+            return $this->cache[$id];
         }
 
         /**

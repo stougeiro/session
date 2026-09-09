@@ -69,7 +69,7 @@
          */
         public function get(string $key, mixed $default = null): mixed
         {
-            if (in_array($key, $this->reservedKeys, true)) {
+            if (isset($this->reservedKeys[$key])) {
                 return $default;
             }
 
@@ -109,10 +109,8 @@
          */
         public function clear(): void
         {
-            $keys = array_keys($_SESSION);
-
-            foreach ($keys as $key) {
-                if ( ! in_array($key, $this->reservedKeys, true)) {
+            foreach ($_SESSION as $key => $_) {
+                if ( ! isset($this->reservedKeys[$key])) {
                     unset($_SESSION[$key]);
                 }
             }

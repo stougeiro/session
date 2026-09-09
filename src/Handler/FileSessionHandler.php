@@ -3,20 +3,22 @@
     namespace STDW\Session\Handler;
 
     use SessionHandlerInterface;
+    use SessionUpdateTimestampHandlerInterface;
+    use RuntimeException;
     use DirectoryIterator;
 
 
-    class FileSessionHandler implements SessionHandlerInterface
+    class FileSessionHandler implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface
     {
         /** @var string
          */
         protected string $path;
 
-        /** @var array<string, mixed>
+        /** @var array<string, string>
          */
         protected array $cache = [];
 
-        /** @var array<string, mixed>
+        /** @var array<string, string>
          */
         protected array $pending = [];
 
@@ -27,8 +29,8 @@
         {
             $this->path = rtrim($path, '/');
 
-            if ( ! is_dir($this->path)) {
-                mkdir($this->path, 0777, true);
+            if ( ! is_dir($this->path) && ! mkdir($this->path, 0700, true)) {
+                throw new RuntimeException("Failed to create session storage directory: {$this->path}");
             }
         }
 
@@ -56,12 +58,10 @@
             $file = $this->filePath($id);
 
             if ( ! is_file($file)) {
-                return false;
+                return '';
             }
 
-            $data = file_get_contents($file);
-            $data = $data !== '' ? $data : false;
-
+            $data = (string) file_get_contents($file);
             $this->cache[$id] = $data;
 
             return $data;
@@ -128,7 +128,36 @@
         {
             $file = $this->filePath($id);
 
-            return ! is_file($file) || unlink($file);
+            if ( ! is_file($file)) {
+                return true;
+            }
+
+            return unlink($file);
+        }
+
+        /**
+         * @param string $id
+         * @return bool
+         */
+        public function validateId(string $id): bool
+        {
+            return preg_match('/^[a-zA-Z0-9,-]{1,128}$/', $id) === 1;
+        }
+
+        /**
+         * @param string $id
+         * @param string $data
+         * @return bool
+         */
+        public function updateTimestamp(string $id, string $data): bool
+        {
+            $file = $this->filePath($id);
+
+            if (is_file($file)) {
+                return touch($file);
+            }
+
+            return true;
         }
 
 
