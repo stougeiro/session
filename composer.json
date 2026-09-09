@@ -1,6 +1,6 @@
 {
     "name": "stougeiro/session",
-    "description": "",
+    "description": "A secure, predictable and extensible session manager for PHP‑FPM applications, featuring custom lifecycle, automatic expiration, safe ID regeneration and pluggable storage handlers (file and SQLite).",
     "type": "library",
     "minimum-stability": "stable",
     "prefer-stable": true,
@@ -12,6 +12,22 @@
         }
     ],
     "keywords": [
+        "session",
+        "php session",
+        "session manager",
+        "session handler",
+        "session lifecycle",
+        "session regeneration",
+        "session expiration",
+        "session security",
+        "php-fpm",
+        "sqlite session",
+        "file session",
+        "session storage",
+        "session cookie",
+        "session destroy",
+        "session start",
+        "middleware"
     ],
     "support": {
         "issues": "https://github.com/stougeiro/session/issues",
