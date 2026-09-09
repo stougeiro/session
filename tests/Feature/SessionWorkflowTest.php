@@ -98,7 +98,8 @@ it('session handles activity timeout', function () {
     ]);
 
     $session->start();
-    $session->set('test', 'data');
+    $session->set('user_id', 123);
+    $session->set('user_name', 'John Doe');
 
     $_SESSION['_last_activity_'] = time() - 10;
 
@@ -112,6 +113,9 @@ it('session handles activity timeout', function () {
     $session2->start();
 
     expect($_SESSION)->toBeArray();
+    expect($_SESSION)->not->toHaveKey('user_id');
+    expect($_SESSION)->not->toHaveKey('user_name');
+    expect($_SESSION)->toHaveKey('_last_activity_');
 
     $session2->destroy();
 });
@@ -143,6 +147,7 @@ it('session regeneration works', function () {
     $session2->start();
 
     expect($_SESSION)->toBeArray();
+    expect($_SESSION)->toHaveKey('_last_regeneration_');
 
     $session2->destroy();
 });

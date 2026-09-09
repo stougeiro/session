@@ -18,19 +18,10 @@ beforeEach(function () {
 
 afterEach(function () {
     $_SESSION = [];
+    $_SERVER = array_diff_key($_SERVER, array_flip([
+        'HTTPS', 'SERVER_PORT',
+    ]));
     $this->cleanDir($this->tempDir);
-});
-
-it('creates session instance', function () {
-    expect($this->session)->toBeInstanceOf(TestableSession::class);
-});
-
-it('extends Session class', function () {
-    expect($this->session)->toBeInstanceOf(Session::class);
-});
-
-it('implements SessionInterface', function () {
-    expect($this->session)->toBeInstanceOf(\STDW\Contract\Session\SessionInterface::class);
 });
 
 it('returns session id as string', function () {
@@ -162,11 +153,9 @@ it('sets last activity on clear', function () {
 });
 
 it('gets last activity with default zero', function () {
-    $this->session->start();
-
     $lastActivity = $this->session->getLastActivity();
 
-    expect($lastActivity)->toBeInt();
+    expect($lastActivity)->toBe(0);
 });
 
 it('sets and gets last activity', function () {
@@ -208,7 +197,7 @@ it('gets last regeneration with default zero', function () {
 
     $lastRegeneration = $this->session->getLastRegeneration();
 
-    expect($lastRegeneration)->toBeInt();
+    expect($lastRegeneration)->toBe(0);
 });
 
 it('gets last regeneration handling non-int value', function () {
@@ -275,10 +264,110 @@ it('stores and retrieves multiple values', function () {
     expect($this->session->get('array'))->toBe([1, 2, 3]);
 });
 
-it('throws exception for disabled session', function () {
-    $config = new SessionConfig([
-        'storage' => $this->tempDir,
-    ]);
+it('isHttps returns true when no server info available', function () {
+    $_SERVER = [];
 
-    expect(fn() => new Session($config))->not->toThrow(\RuntimeException::class);
+    $reflection = new ReflectionMethod($this->session, 'isHttps');
+    $result = $reflection->invoke($this->session);
+
+    expect($result)->toBeTrue();
+});
+
+it('isHttps returns true when HTTPS is on and port is 443', function () {
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['SERVER_PORT'] = 443;
+
+    $reflection = new ReflectionMethod($this->session, 'isHttps');
+    $result = $reflection->invoke($this->session);
+
+    expect($result)->toBeTrue();
+});
+
+it('isHttps returns false when HTTPS is off', function () {
+    $_SERVER['HTTPS'] = 'off';
+
+    $reflection = new ReflectionMethod($this->session, 'isHttps');
+    $result = $reflection->invoke($this->session);
+
+    expect($result)->toBeFalse();
+});
+
+it('isHttps returns false when port is not 443', function () {
+    $_SERVER['SERVER_PORT'] = 80;
+
+    $reflection = new ReflectionMethod($this->session, 'isHttps');
+    $result = $reflection->invoke($this->session);
+
+    expect($result)->toBeFalse();
+});
+
+it('isHttps returns false when HTTPS is off and port is 443', function () {
+    $_SERVER['HTTPS'] = 'off';
+    $_SERVER['SERVER_PORT'] = 443;
+
+    $reflection = new ReflectionMethod($this->session, 'isHttps');
+    $result = $reflection->invoke($this->session);
+
+    expect($result)->toBeFalse();
+});
+
+it('isHttps returns false when HTTPS is on and port is 80', function () {
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['SERVER_PORT'] = 80;
+
+    $reflection = new ReflectionMethod($this->session, 'isHttps');
+    $result = $reflection->invoke($this->session);
+
+    expect($result)->toBeFalse();
+});
+
+it('isHttps returns true when only HTTPS flag is on', function () {
+    $_SERVER['HTTPS'] = 'on';
+
+    $reflection = new ReflectionMethod($this->session, 'isHttps');
+    $result = $reflection->invoke($this->session);
+
+    expect($result)->toBeTrue();
+});
+
+it('isHttps returns true when only port is 443', function () {
+    $_SERVER['SERVER_PORT'] = 443;
+
+    $reflection = new ReflectionMethod($this->session, 'isHttps');
+    $result = $reflection->invoke($this->session);
+
+    expect($result)->toBeTrue();
+});
+
+it('resolveSameSite returns Lax when sameSite is None and not HTTPS', function () {
+    $_SERVER['HTTPS'] = 'off';
+
+    $reflection = new ReflectionMethod($this->session, 'resolveSameSite');
+    $result = $reflection->invoke($this->session, 'None');
+
+    expect($result)->toBe('Lax');
+});
+
+it('resolveSameSite returns Strict when sameSite is Strict', function () {
+    $reflection = new ReflectionMethod($this->session, 'resolveSameSite');
+    $result = $reflection->invoke($this->session, 'Strict');
+
+    expect($result)->toBe('Strict');
+});
+
+it('resolveSameSite returns Lax when sameSite is Lax', function () {
+    $reflection = new ReflectionMethod($this->session, 'resolveSameSite');
+    $result = $reflection->invoke($this->session, 'Lax');
+
+    expect($result)->toBe('Lax');
+});
+
+it('resolveSameSite returns None when sameSite is None and HTTPS', function () {
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['SERVER_PORT'] = 443;
+
+    $reflection = new ReflectionMethod($this->session, 'resolveSameSite');
+    $result = $reflection->invoke($this->session, 'None');
+
+    expect($result)->toBe('None');
 });
