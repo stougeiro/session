@@ -283,6 +283,18 @@
         protected function doSessionDestroy(): void
         {
             session_destroy();
+
+            $params = session_get_cookie_params();
+
+            setcookie(
+                $this->config->name(),
+                '',
+                time() - 3600,
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly'],
+            );
         }
 
         /** @return bool 
