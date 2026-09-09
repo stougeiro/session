@@ -3,6 +3,7 @@
     namespace STDW\Session\Handler;
 
     use SessionHandlerInterface;
+    use DirectoryIterator;
 
 
     class FileSessionHandler implements SessionHandlerInterface
@@ -10,6 +11,14 @@
         /** @var string
          */
         protected string $path;
+
+        /** @var array<string, mixed>
+         */
+        protected array $cache = [];
+
+        /** @var array<string, mixed>
+         */
+        protected array $pending = [];
 
 
         /** @param string $path 
@@ -40,23 +49,22 @@
          */
         public function read(string $id): string|false
         {
+            if (isset($this->cache[$id])) {
+                return $this->cache[$id];
+            }
+
             $file = $this->filePath($id);
 
             if ( ! is_file($file)) {
                 return false;
             }
 
-            $fp = fopen($file, 'rb');
+            $data = file_get_contents($file);
+            $data = $data !== '' ? $data : false;
 
-            if ( ! $fp) {
-                return false;
-            }
+            $this->cache[$id] = $data;
 
-            $data = stream_get_contents($fp);
-
-            fclose($fp);
-
-            return $data ?: false;
+            return $data;
         }
 
         /**
@@ -66,28 +74,10 @@
          */
         public function write(string $id, string $data): bool
         {
-            $file = $this->filePath($id);
-            $fp = fopen($file, 'c+b');
+            $this->cache[$id] = $data;
+            $this->pending[$id] = $data;
 
-            if ( ! $fp) {
-                return false;
-            }
-
-            if ( ! flock($fp, LOCK_EX)) {
-                fclose($fp);
-
-                return false;
-            }
-
-            ftruncate($fp, 0);
-
-            $bytes = fwrite($fp, $data);
-
-            fflush($fp);
-            flock($fp, LOCK_UN);
-            fclose($fp);
-
-            return $bytes !== false;
+            return true;
         }
 
         /**
@@ -98,13 +88,16 @@
         {
             $count = 0;
             $now = time();
-            $files = glob($this->path . '/sess_*') ?: [];
 
-            foreach ($files as $file) {
-                if (filemtime($file) + $max_lifetime < $now) {
-                    @unlink($file);
+            foreach (new DirectoryIterator($this->path) as $file) {
+                if ($file->isDot() || !$file->isFile())
+                    continue;
+
+                if ($file->getMTime() + $max_lifetime > $now)
+                    continue;
+
+                if (unlink($file->getPathname()))
                     $count++;
-                }
             }
 
             return $count;
@@ -114,6 +107,16 @@
          */
         public function close(): bool
         {
+            if (empty($this->pending)) {
+                return true;
+            }
+           
+            foreach ($this->pending as $id => $data) {
+                file_put_contents($this->filePath($id), $data, LOCK_EX);
+            }
+
+            $this->pending = [];
+
             return true;
         }
 
@@ -125,11 +128,7 @@
         {
             $file = $this->filePath($id);
 
-            if (is_file($file)) {
-                unlink($file);
-            }
-
-            return true;
+            return ! is_file($file) || unlink($file);
         }
 
 

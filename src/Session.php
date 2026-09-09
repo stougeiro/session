@@ -84,7 +84,7 @@
          */
         public function set(string $key, mixed $value): void
         {
-            if (in_array($key, $this->reservedKeys, true)) {
+            if (isset($this->reservedKeys[$key])) {
                 throw new RuntimeException("Cannot write to reserved session key '{$key}'");
             }
 
@@ -98,7 +98,7 @@
          */
         public function remove(string $key): void
         {
-            if (in_array($key, $this->reservedKeys, true)) {
+            if (isset($this->reservedKeys[$key])) {
                 throw new RuntimeException("Cannot remove reserved session key '{$key}'");
             }
 
@@ -222,6 +222,9 @@
             $this->applyCookieSettings();
 
             session_start();
+
+            $this->setLastActivity(time());
+            $this->setLastRegeneration(time());
         }
 
         /**

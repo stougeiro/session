@@ -16,6 +16,14 @@
          */
         protected string $table = 'sessions';
 
+        /** @var array<string, mixed>
+         */
+        protected array $cache = [];
+
+        /** @var array<string, mixed>
+         */
+        protected array $pending = [];
+
 
         /** @param string $path 
          */
@@ -36,6 +44,8 @@
             $this->pdo->exec("PRAGMA synchronous = NORMAL");
             $this->pdo->exec("PRAGMA temp_store = MEMORY");
             $this->pdo->exec("PRAGMA mmap_size = 268435456");
+            $this->pdo->exec("PRAGMA cache_size = -20000");
+            $this->pdo->exec("PRAGMA foreign_keys = OFF");
 
             $this->createTable();
         }
@@ -57,6 +67,10 @@
          */
         public function read(string $id): string|false
         {
+            if (isset($this->cache[$id])) {
+                return $this->cache[$id];
+            }
+
             $stmt = $this->pdo->prepare("
                 SELECT data FROM {$this->table}
                 WHERE id = :id
@@ -64,9 +78,12 @@
 
             $stmt->execute(['id' => $id]);
 
-            $data = (string) $stmt->fetchColumn();
+            $data = $stmt->fetchColumn();
+            $data = $data !== '' ? $data : false;
 
-            return $data ?: false;
+            $this->cache[$id] = $data;
+
+            return $data;
         }
 
         /**
@@ -76,16 +93,10 @@
          */
         public function write(string $id, string $data): bool
         {
-            $stmt = $this->pdo->prepare("
-                INSERT OR REPLACE INTO {$this->table} (id, data, timestamp)
-                VALUES (:id, :data, :timestamp)
-            ");
+            $this->cache[$id] = $data;
+            $this->pending[$id] = $data;
 
-            return $stmt->execute([
-                'id' => $id,
-                'data' => $data,
-                'timestamp' => time()
-            ]);
+            return true;
         }
 
         /**
@@ -110,6 +121,27 @@
          */
         public function close(): bool
         {
+            if (empty($this->pending)) {
+                return true;
+            }
+
+            $stmt = $this->pdo->prepare("
+                INSERT OR REPLACE INTO {$this->table} (id, data, timestamp)
+                VALUES (:id, :data, :timestamp)
+            ");
+
+            $timestamp = time();
+
+            foreach ($this->pending as $id => $data) {
+                $stmt->execute([
+                    'id'        => $id,
+                    'data'      => $data,
+                    'timestamp' => $timestamp
+                ]);
+            }
+
+            $this->pending = [];
+
             return true;
         }
 
@@ -137,9 +169,14 @@
                     id TEXT PRIMARY KEY,
                     data BLOB,
                     timestamp INTEGER
-                )
+                ) WITHOUT ROWID
             ";
 
             $this->pdo->exec($sql);
+
+            $this->pdo->exec("
+                CREATE INDEX IF NOT EXISTS {$this->table}_timestamp_idx
+                ON {$this->table} (timestamp)
+            ");
         }
     }
