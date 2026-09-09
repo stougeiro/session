@@ -10,7 +10,7 @@
     {
         /** @var string The reserved session key for storing flash messages.
          */
-        protected const FLASH_KEY = '__FLASH__';
+        private const FLASH_KEY = '__FLASH__';
 
 
         /** @param SessionInterface $session 
