@@ -13,7 +13,7 @@
         private const FLASH_KEY = '__FLASH__';
 
 
-        /** @param SessionInterface $session 
+        /** @param SessionInterface $session
          */
         public function __construct(
             protected SessionInterface $session)
@@ -21,9 +21,9 @@
 
 
         /**
-         * @param string $key 
-         * @param mixed $default 
-         * @return mixed 
+         * @param string $key
+         * @param mixed $default
+         * @return mixed
          */
         public function get(string $key, mixed $default = null): mixed
         {
@@ -37,9 +37,9 @@
         }
 
         /**
-         * @param string $key 
-         * @param mixed $value 
-         * @return void 
+         * @param string $key
+         * @param mixed $value
+         * @return void
          */
         public function set(string $key, mixed $value): void
         {
@@ -52,7 +52,7 @@
             $this->write($flash);
         }
 
-        /** @return void 
+        /** @return void
          */
         public function clear(): void
         {
@@ -74,7 +74,7 @@
         }
 
 
-        /** @return array<string, array{age: int, value: mixed}> 
+        /** @return array<string, array{age: int, value: mixed}>
          */
         protected function read(): array
         {
@@ -83,8 +83,8 @@
         }
 
         /**
-         * @param array<string, array{age: int, value: mixed}> $flash 
-         * @return void 
+         * @param array<string, array{age: int, value: mixed}> $flash
+         * @return void
          */
         protected function write(array $flash): void
         {

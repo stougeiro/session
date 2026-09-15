@@ -20,8 +20,8 @@
 
 
         /**
-         * @param SessionConfigInterface $config 
-         * @throws RuntimeException 
+         * @param SessionConfigInterface $config
+         * @throws RuntimeException
          */
         public function __construct(
             protected SessionConfigInterface $config
@@ -32,7 +32,7 @@
         }
 
 
-        /** @return void 
+        /** @return void
          */
         public function start(): void
         {
@@ -44,7 +44,7 @@
             $this->handleRegeneration();
         }
 
-        /** @return string 
+        /** @return string
          */
         public function id(): string
         {
@@ -52,8 +52,8 @@
         }
 
         /**
-         * @param string $key 
-         * @return bool 
+         * @param string $key
+         * @return bool
          */
         public function has(string $key): bool
         {
@@ -61,9 +61,9 @@
         }
 
         /**
-         * @param string $key 
-         * @param mixed $default 
-         * @return mixed 
+         * @param string $key
+         * @param mixed $default
+         * @return mixed
          */
         public function get(string $key, mixed $default = null): mixed
         {
@@ -75,10 +75,10 @@
         }
 
         /**
-         * @param string $key 
-         * @param mixed $value 
-         * @return void 
-         * @throws RuntimeException 
+         * @param string $key
+         * @param mixed $value
+         * @return void
+         * @throws RuntimeException
          */
         public function set(string $key, mixed $value): void
         {
@@ -90,9 +90,9 @@
         }
 
         /**
-         * @param string $key 
-         * @return void 
-         * @throws RuntimeException 
+         * @param string $key
+         * @return void
+         * @throws RuntimeException
          */
         public function remove(string $key): void
         {
@@ -103,7 +103,7 @@
             unset($_SESSION[$key]);
         }
 
-        /** @return void 
+        /** @return void
          */
         public function clear(): void
         {
@@ -116,7 +116,7 @@
             $this->setLastActivity(time());
         }
 
-        /** @return void 
+        /** @return void
          */
         public function destroy(): void
         {
@@ -126,35 +126,35 @@
         }
 
 
-        /** @return bool 
+        /** @return bool
          */
         protected function isSessionStatusDisabled(): bool
         {
             return session_status() === PHP_SESSION_DISABLED;
         }
 
-        /** @return bool 
+        /** @return bool
          */
         protected function isSessionStatusNone(): bool
         {
             return session_status() === PHP_SESSION_NONE;
         }
 
-        /** @return bool 
+        /** @return bool
          */
         protected function isSessionStatusActive(): bool
         {
             return session_status() === PHP_SESSION_ACTIVE;
         }
 
-        /** @return string 
+        /** @return string
          */
         protected function getSessionId(): string
         {
             return session_id() ?: '';
         }
 
-        /** @return void 
+        /** @return void
          */
         protected function applyHandlerSettings(): void
         {
@@ -166,7 +166,7 @@
             session_set_save_handler($handler, true);
         }
 
-        /** @return void 
+        /** @return void
          */
         protected function applyIniSettings(): void
         {
@@ -189,21 +189,25 @@
             session_cache_limiter('nocache');
         }
 
-        /** @return void 
+        /** @return void
          */
         protected function applyCookieSettings(): void
         {
+            /** @var 'Lax'|'Strict'|'None'
+             */
+            $sameSite = $this->config->cookieSameSite();
+
             session_set_cookie_params([
                 'lifetime' => $this->config->cookieLifetime(),
                 'path'     => '/',
                 'domain'   => '',
                 'secure'   => $this->isHttps(),
                 'httponly' => true,
-                'samesite' => $this->resolveSameSite($this->config->cookieSameSite()),
+                'samesite' => $this->resolveSameSite($sameSite),
             ]);
         }
 
-        /** @return void 
+        /** @return void
          */
         protected function doSessionStart(): void
         {
@@ -218,9 +222,9 @@
         }
 
         /**
-         * @param string $type 
-         * @param string $path 
-         * @return SessionHandlerInterface 
+         * @param string $type
+         * @param string $path
+         * @return SessionHandlerInterface
          */
         protected function createHandler(string $type, string $path): SessionHandlerInterface
         {
@@ -230,7 +234,7 @@
             };
         }
 
-        /** @return void 
+        /** @return void
          */
         protected function handleActivity(): void
         {
@@ -246,7 +250,7 @@
             $this->setLastActivity($now);
         }
 
-        /** @return void 
+        /** @return void
          */
         protected function handleRegeneration(): void
         {
@@ -259,14 +263,14 @@
             }
         }
 
-        /** @return void 
+        /** @return void
          */
         protected function doSessionRegenerateId(): void
         {
             session_regenerate_id(true);
         }
 
-        /** @return void 
+        /** @return void
          */
         protected function doSessionDestroy(): void
         {
@@ -285,7 +289,7 @@
             );
         }
 
-        /** @return bool 
+        /** @return bool
          */
         protected function isHttps(): bool
         {
@@ -299,8 +303,8 @@
         }
 
         /**
-         * @param 'Lax'|'Strict'|'None' $sameSite 
-         * @return 'Lax'|'Strict'|'None' 
+         * @param 'Lax'|'Strict'|'None' $sameSite
+         * @return 'Lax'|'Strict'|'None'
          */
         protected function resolveSameSite(string $sameSite): string
         {
@@ -311,7 +315,7 @@
             return $sameSite;
         }
 
-        /** @return int 
+        /** @return int
          */
         protected function getLastActivity(): int
         {
@@ -329,15 +333,15 @@
         }
 
         /**
-         * @param int $time 
-         * @return void 
+         * @param int $time
+         * @return void
          */
         protected function setLastActivity(int $time): void
         {
             $_SESSION['_last_activity_'] = $time;
         }
 
-        /** @return int 
+        /** @return int
          */
         protected function getLastRegeneration(): int
         {
@@ -355,8 +359,8 @@
         }
 
         /**
-         * @param int $time 
-         * @return void 
+         * @param int $time
+         * @return void
          */
         protected function setLastRegeneration(int $time): void
         {

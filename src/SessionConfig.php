@@ -23,7 +23,7 @@
          */
         protected int $cookieLifetime;
 
-        /** @var string
+        /** @var 'Lax'|'Strict'|'None'
          */
         protected string $cookieSameSite;
 
@@ -174,8 +174,8 @@
         }
 
         /**
-         * @param string $handler 
-         * @return string 
+         * @param string $handler
+         * @return string
          */
         protected function validateHandler(string $handler): string
         {
@@ -185,8 +185,8 @@
         }
 
         /**
-         * @param string $name 
-         * @return string 
+         * @param string $name
+         * @return string
          */
         protected function validateName(string $name): string
         {
@@ -198,8 +198,8 @@
         }
 
         /**
-         * @param string $path 
-         * @return string 
+         * @param string $path
+         * @return string
          */
         protected function validateStorage(string $path): string
         {
@@ -211,10 +211,10 @@
         }
 
         /**
-         * @param int $value 
-         * @param null|int $min 
-         * @param null|int $max 
-         * @return int 
+         * @param int $value
+         * @param null|int $min
+         * @param null|int $max
+         * @return int
          */
         protected function validateInt(int $value, ?int $min = null, ?int $max = null): int
         {
@@ -230,8 +230,8 @@
         }
 
         /**
-         * @param string $value 
-         * @return 'Lax'|'Strict'|'None' 
+         * @param string $value
+         * @return 'Lax'|'Strict'|'None'
          */
         protected function validateSameSite(string $value): string
         {
@@ -241,7 +241,7 @@
             return in_array($value, $allowed, true) ? $value : 'Lax';
         }
 
-        /** @return string 
+        /** @return string
          */
         protected function getDefaultSavePath(): string
         {

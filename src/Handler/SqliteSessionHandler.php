@@ -49,7 +49,7 @@
         protected array $pending = [];
 
 
-        /** @param string $storage 
+        /** @param string $storage
          */
         public function __construct(string $storage)
         {
@@ -83,9 +83,9 @@
 
 
         /**
-         * @param string $path 
-         * @param string $name 
-         * @return bool 
+         * @param string $path
+         * @param string $name
+         * @return bool
          */
         public function open(string $path, string $name): bool
         {
@@ -93,8 +93,8 @@
         }
 
         /**
-         * @param string $id 
-         * @return string|false 
+         * @param string $id
+         * @return string|false
          */
         public function read(string $id): string|false
         {
@@ -117,9 +117,9 @@
         }
 
         /**
-         * @param string $id 
-         * @param string $data 
-         * @return bool 
+         * @param string $id
+         * @param string $data
+         * @return bool
          */
         public function write(string $id, string $data): bool
         {
@@ -130,8 +130,8 @@
         }
 
         /**
-         * @param int $max_lifetime 
-         * @return int|false 
+         * @param int $max_lifetime
+         * @return int|false
          */
         public function gc(int $max_lifetime): int|false
         {
@@ -143,7 +143,7 @@
             return $this->stmtDeleteExpired->rowCount();
         }
 
-        /** @return bool 
+        /** @return bool
          */
         public function close(): bool
         {
@@ -168,8 +168,8 @@
         }
 
         /**
-         * @param string $id 
-         * @return bool 
+         * @param string $id
+         * @return bool
          */
         public function destroy(string $id): bool
         {
@@ -204,7 +204,7 @@
         }
 
 
-        /** @return void 
+        /** @return void
          */
         protected function createTable(): void
         {
@@ -224,7 +224,7 @@
             ");
         }
 
-        /** @return void 
+        /** @return void
          */
         protected function prepareStatements(): void
         {
