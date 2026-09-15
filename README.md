@@ -74,10 +74,12 @@ $config = new SessionConfig([
         'same_site' => 'Lax',
     ],
 
-    'extra' => [
+    'guard' => [
         'regeneration' => true,
         'regeneration_time' => 300, // 5 minutes
     ],
+
+    'extra' => [],
 ]);
 
 $session = new Session($config);
