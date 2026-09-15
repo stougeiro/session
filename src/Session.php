@@ -253,7 +253,7 @@
             $now = time();
             $last = $this->getLastRegeneration();
 
-            if (($now - $last) > $this->config->guardRegenerationTime()) {
+            if (($now - $last) > $this->config->guardRegeneration()) {
                 $this->doSessionRegenerateId();
                 $this->setLastRegeneration($now);
             }

@@ -75,8 +75,7 @@ $config = new SessionConfig([
     ],
 
     'guard' => [
-        'regeneration' => true,
-        'regeneration_time' => 300, // 5 minutes
+        'regeneration' => 300, // 5 minutes
     ],
 
     'extra' => [],

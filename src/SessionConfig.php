@@ -41,7 +41,7 @@
 
         /** @var int
          */
-        protected int $guardRegenerationTime;
+        protected int $guardRegeneration;
 
         /** @var array<string, mixed>
          */
@@ -71,14 +71,14 @@
                     'same_site' => 'Lax',
                 ],
 
-                'garbage_collector' => [
+                'gc' => [
                     'maxlifetime' => 1200,
                     'probability' => 1,
                     'divisor' => 100,
                 ],
 
                 'guard' => [
-                    'regeneration_time' => 600,
+                    'regeneration' => 600,
                 ],
 
                 'extra' => [],
@@ -93,11 +93,11 @@
             $this->cookieLifetime = $this->validateInt($config['cookie']['lifetime'], min: 0, max: 604800);
             $this->cookieSameSite = $this->validateSameSite($config['cookie']['same_site']);
 
-            $this->gcMaxLifetime = $this->validateInt($config['garbage_collector']['maxlifetime'], min: 1, max: 1800);
-            $this->gcProbability = $this->validateInt($config['garbage_collector']['probability'], min: 1, max: 100);
-            $this->gcDivisor = $this->validateInt($config['garbage_collector']['divisor'], min: 1, max: 100);
+            $this->gcMaxLifetime = $this->validateInt($config['gc']['maxlifetime'], min: 1, max: 1800);
+            $this->gcProbability = $this->validateInt($config['gc']['probability'], min: 1, max: 100);
+            $this->gcDivisor = $this->validateInt($config['gc']['divisor'], min: 1, max: 100);
 
-            $this->guardRegenerationTime = $this->validateInt($config['guard']['regeneration_time'], min: 1, max: 900);
+            $this->guardRegeneration = $this->validateInt($config['guard']['regeneration'], min: 1, max: 900);
 
             $this->extra = $config['extra'];
         }
@@ -161,9 +161,9 @@
 
         /** @return int
          */
-        public function guardRegenerationTime(): int
+        public function guardRegeneration(): int
         {
-            return $this->guardRegenerationTime;
+            return $this->guardRegeneration;
         }
 
         /** @return array<string, mixed>
