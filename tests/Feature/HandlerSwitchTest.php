@@ -63,7 +63,7 @@ it('both handlers destroy sessions', function () {
     $sqliteHandler->destroy($sqliteId);
 
     expect($fileHandler->read($fileId))->toBe('');
-    expect($sqliteHandler->read($sqliteId))->toBeFalse();
+    expect($sqliteHandler->read($sqliteId))->toBe('');
 });
 
 it('both handlers garbage collect expired sessions', function () {

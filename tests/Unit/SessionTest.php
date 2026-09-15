@@ -146,14 +146,14 @@ it('sets last activity on clear', function () {
     $this->session->clear();
     $after = time();
 
-    $lastActivity = $this->session->getLastActivity();
+    $lastActivity = $this->session->publicGetLastActivity();
 
     expect($lastActivity)->toBeGreaterThanOrEqual($before);
     expect($lastActivity)->toBeLessThanOrEqual($after);
 });
 
 it('gets last activity with default zero', function () {
-    $lastActivity = $this->session->getLastActivity();
+    $lastActivity = $this->session->publicGetLastActivity();
 
     expect($lastActivity)->toBe(0);
 });
@@ -162,9 +162,9 @@ it('sets and gets last activity', function () {
     $this->session->start();
 
     $time = 1234567890;
-    $this->session->setLastActivity($time);
+    $this->session->publicSetLastActivity($time);
 
-    expect($this->session->getLastActivity())->toBe($time);
+    expect($this->session->publicGetLastActivity())->toBe($time);
 });
 
 it('gets last activity handling non-int value', function () {
@@ -172,7 +172,7 @@ it('gets last activity handling non-int value', function () {
 
     $_SESSION['_last_activity_'] = '12345';
 
-    expect($this->session->getLastActivity())->toBe(12345);
+    expect($this->session->publicGetLastActivity())->toBe(12345);
 });
 
 it('gets last activity returning zero for invalid value', function () {
@@ -180,22 +180,20 @@ it('gets last activity returning zero for invalid value', function () {
 
     $_SESSION['_last_activity_'] = 'invalid';
 
-    expect($this->session->getLastActivity())->toBe(0);
+    expect($this->session->publicGetLastActivity())->toBe(0);
 });
 
 it('gets and sets last regeneration', function () {
     $this->session->start();
 
     $time = 1234567890;
-    $this->session->setLastRegeneration($time);
+    $this->session->publicSetLastRegeneration($time);
 
-    expect($this->session->getLastRegeneration())->toBe($time);
+    expect($this->session->publicGetLastRegeneration())->toBe($time);
 });
 
 it('gets last regeneration with default zero', function () {
-    $this->session->start();
-
-    $lastRegeneration = $this->session->getLastRegeneration();
+    $lastRegeneration = $this->session->publicGetLastRegeneration();
 
     expect($lastRegeneration)->toBe(0);
 });
@@ -205,7 +203,7 @@ it('gets last regeneration handling non-int value', function () {
 
     $_SESSION['_last_regeneration_'] = '99999';
 
-    expect($this->session->getLastRegeneration())->toBe(99999);
+    expect($this->session->publicGetLastRegeneration())->toBe(99999);
 });
 
 it('gets last regeneration returning zero for invalid value', function () {
@@ -213,7 +211,7 @@ it('gets last regeneration returning zero for invalid value', function () {
 
     $_SESSION['_last_regeneration_'] = 'invalid';
 
-    expect($this->session->getLastRegeneration())->toBe(0);
+    expect($this->session->publicGetLastRegeneration())->toBe(0);
 });
 
 it('starts session', function () {

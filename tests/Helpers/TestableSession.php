@@ -39,4 +39,24 @@ class TestableSession extends Session
     {
         // no-op
     }
+
+    public function publicGetLastActivity(): int
+    {
+        return $this->getLastActivity();
+    }
+
+    public function publicSetLastActivity(int $time): void
+    {
+        $this->setLastActivity($time);
+    }
+
+    public function publicGetLastRegeneration(): int
+    {
+        return $this->getLastRegeneration();
+    }
+
+    public function publicSetLastRegeneration(int $time): void
+    {
+        $this->setLastRegeneration($time);
+    }
 }

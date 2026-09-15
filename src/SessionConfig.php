@@ -54,7 +54,7 @@
          *    name?: string,
          *    storage?: string,
          *    cookie?: array{lifetime?: int, same_site?: 'Lax'|'Strict'|'None'},
-         *    garbage_collector?: array{maxlifetime?: int, probability?: int, divisor?: int},
+         *    gc?: array{maxlifetime?: int, probability?: int, divisor?: int},
          *    guard?: array{regeneration?: int},
          *    extra?: array<string, mixed>
          * } $config

@@ -9,7 +9,7 @@ return [
         'lifetime' => 3600,
         'same_site' => 'Strict',
     ],
-    'garbage_collector' => [
+    'gc' => [
         'maxlifetime' => 600,
     ],
     'guard' => [

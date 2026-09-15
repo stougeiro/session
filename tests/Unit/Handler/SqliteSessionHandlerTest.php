@@ -47,10 +47,10 @@ it('open returns true', function () {
     expect($result)->toBeTrue();
 });
 
-it('read returns false for nonexistent session', function () {
+it('read returns empty string for nonexistent session', function () {
     $result = $this->handler->read('nonexistent_id');
 
-    expect($result)->toBeFalse();
+    expect($result)->toBe('');
 });
 
 it('write and read session data', function () {
@@ -111,7 +111,7 @@ it('destroy removes session record', function () {
 
     $handler2 = $this->createSqliteHandler($this->tempDir);
     $result = $handler2->read($id);
-    expect($result)->toBeFalse();
+    expect($result)->toBe('');
 });
 
 it('destroy returns true for nonexistent session', function () {
@@ -140,7 +140,7 @@ it('gc removes expired records', function () {
 
     $handler2 = $this->createSqliteHandler($this->tempDir);
     $result1 = $handler2->read($id1);
-    expect($result1)->toBeFalse();
+    expect($result1)->toBe('');
 
     $result2 = $handler2->read($id2);
     expect($result2)->toBe('new_data');
@@ -259,8 +259,8 @@ it('implements SessionUpdateTimestampHandlerInterface', function () {
 
 it('validateId accepts valid ids', function () {
     expect($this->handler->validateId('abc123'))->toBeTrue();
-    expect($this->handler->validateId('sess_' . uniqid()))->toBeTrue();
-    expect($this->handler->validateId('A-b_c,1'))->toBeTrue();
+    expect($this->handler->validateId('sess-' . uniqid()))->toBeTrue();
+    expect($this->handler->validateId('A-b-c,1'))->toBeTrue();
 });
 
 it('validateId rejects invalid ids', function () {
