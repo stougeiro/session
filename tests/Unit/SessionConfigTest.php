@@ -20,19 +20,13 @@ it('creates config with default values', function () {
 
     expect($config->handler())->toBe('file');
     expect($config->name())->toBe('PHPSESSID');
-    expect($config->cookie())->toBe([
-        'lifetime' => 0,
-        'same_site' => 'Lax',
-    ]);
-    expect($config->gc())->toBe([
-        'maxlifetime' => 1200,
-        'probability' => 1,
-        'divisor' => 100,
-    ]);
-    expect($config->extra())->toBe([
-        'regeneration' => false,
-        'regeneration_time' => 600,
-    ]);
+    expect($config->cookieLifetime())->toBe(0);
+    expect($config->cookieSameSite())->toBe('Lax');
+    expect($config->gcMaxLifetime())->toBe(1200);
+    expect($config->gcProbability())->toBe(1);
+    expect($config->gcDivisor())->toBe(100);
+    expect($config->guardRegeneration())->toBe(600);
+    expect($config->extra())->toBe([]);
 });
 
 it('creates config with custom handler file', function () {
@@ -109,10 +103,8 @@ it('creates config with custom cookie settings', function () {
         ],
     ]);
 
-    expect($config->cookie())->toBe([
-        'lifetime' => 3600,
-        'same_site' => 'Strict',
-    ]);
+    expect($config->cookieLifetime())->toBe(3600);
+    expect($config->cookieSameSite())->toBe('Strict');
 });
 
 it('validates cookie lifetime min', function () {
@@ -122,7 +114,7 @@ it('validates cookie lifetime min', function () {
         ],
     ]);
 
-    expect($config->cookie()['lifetime'])->toBe(0);
+    expect($config->cookieLifetime())->toBe(0);
 });
 
 it('validates cookie lifetime max', function () {
@@ -132,7 +124,7 @@ it('validates cookie lifetime max', function () {
         ],
     ]);
 
-    expect($config->cookie()['lifetime'])->toBe(604800);
+    expect($config->cookieLifetime())->toBe(604800);
 });
 
 it('normalizes same_site value', function () {
@@ -142,7 +134,7 @@ it('normalizes same_site value', function () {
         ],
     ]);
 
-    expect($config->cookie()['same_site'])->toBe('Strict');
+    expect($config->cookieSameSite())->toBe('Strict');
 });
 
 it('falls back to Lax for invalid same_site', function () {
@@ -152,97 +144,91 @@ it('falls back to Lax for invalid same_site', function () {
         ],
     ]);
 
-    expect($config->cookie()['same_site'])->toBe('Lax');
+    expect($config->cookieSameSite())->toBe('Lax');
 });
 
 it('creates config with custom garbage collector settings', function () {
     $config = new SessionConfig([
-        'garbage_collector' => [
+        'gc' => [
             'maxlifetime' => 600,
             'probability' => 5,
             'divisor' => 50,
         ],
     ]);
 
-    expect($config->gc())->toBe([
-        'maxlifetime' => 600,
-        'probability' => 5,
-        'divisor' => 50,
-    ]);
+    expect($config->gcMaxLifetime())->toBe(600);
+    expect($config->gcProbability())->toBe(5);
+    expect($config->gcDivisor())->toBe(50);
 });
 
 it('validates gc maxlifetime min', function () {
     $config = new SessionConfig([
-        'garbage_collector' => [
+        'gc' => [
             'maxlifetime' => 0,
         ],
     ]);
 
-    expect($config->gc()['maxlifetime'])->toBe(1);
+    expect($config->gcMaxLifetime())->toBe(1);
 });
 
 it('validates gc maxlifetime max', function () {
     $config = new SessionConfig([
-        'garbage_collector' => [
+        'gc' => [
             'maxlifetime' => 9999,
         ],
     ]);
 
-    expect($config->gc()['maxlifetime'])->toBe(1800);
+    expect($config->gcMaxLifetime())->toBe(1800);
 });
 
 it('validates gc probability bounds', function () {
     $config = new SessionConfig([
-        'garbage_collector' => [
+        'gc' => [
             'probability' => 150,
         ],
     ]);
 
-    expect($config->gc()['probability'])->toBe(100);
+    expect($config->gcProbability())->toBe(100);
 });
 
 it('validates gc divisor bounds', function () {
     $config = new SessionConfig([
-        'garbage_collector' => [
+        'gc' => [
             'divisor' => 0,
         ],
     ]);
 
-    expect($config->gc()['divisor'])->toBe(1);
+    expect($config->gcDivisor())->toBe(1);
 });
 
-it('creates config with custom extra settings', function () {
+it('creates config with custom guard regeneration', function () {
     $config = new SessionConfig([
-        'extra' => [
-            'regeneration' => true,
-            'regeneration_time' => 300,
+        'guard' => [
+            'regeneration' => 300,
         ],
     ]);
 
-    expect($config->extra())->toBe([
-        'regeneration' => true,
-        'regeneration_time' => 300,
-    ]);
+    expect($config->guardRegeneration())->toBe(300);
 });
 
-it('validates regeneration_time min', function () {
+it('validates guard regeneration min', function () {
     $config = new SessionConfig([
-        'extra' => [
-            'regeneration_time' => 0,
+        'guard' => [
+            'regeneration' => 0,
         ],
     ]);
 
-    expect($config->extra()['regeneration_time'])->toBe(1);
+    expect($config->guardRegeneration())->toBe(1);
 });
 
-it('validates regeneration_time max', function () {
+it('validates guard regeneration max', function () {
     $config = new SessionConfig([
-        'extra' => [
-            'regeneration_time' => 9999,
+        'guard' => [
+            'regeneration' => 9999,
         ],
     ]);
 
-    expect($config->extra()['regeneration_time'])->toBe(900);
+    expect($config->guardRegeneration())->toBe(900);
 });
 
 it('creates config from fixture default', function () {
@@ -267,9 +253,8 @@ it('creates config from fixture custom', function () {
 
     expect($config->handler())->toBe('file');
     expect($config->name())->toBe('CUSTOM_SESSID');
-    expect($config->cookie()['lifetime'])->toBe(3600);
-    expect($config->cookie()['same_site'])->toBe('Strict');
-    expect($config->gc()['maxlifetime'])->toBe(600);
-    expect($config->extra()['regeneration'])->toBeTrue();
-    expect($config->extra()['regeneration_time'])->toBe(300);
+    expect($config->cookieLifetime())->toBe(3600);
+    expect($config->cookieSameSite())->toBe('Strict');
+    expect($config->gcMaxLifetime())->toBe(600);
+    expect($config->guardRegeneration())->toBe(300);
 });

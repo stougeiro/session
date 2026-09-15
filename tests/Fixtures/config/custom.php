@@ -12,8 +12,7 @@ return [
     'garbage_collector' => [
         'maxlifetime' => 600,
     ],
-    'extra' => [
-        'regeneration' => true,
-        'regeneration_time' => 300,
+    'guard' => [
+        'regeneration' => 300,
     ],
 ];

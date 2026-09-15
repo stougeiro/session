@@ -9,6 +9,9 @@
         <testsuite name="Test Suite">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
+        <testsuite name="Performance">
+            <directory suffix="Bench.php">./tests/Performance</directory>
+        </testsuite>
     </testsuites>
 
     <source>
