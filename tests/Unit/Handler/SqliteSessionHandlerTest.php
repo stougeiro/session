@@ -252,3 +252,53 @@ it('stores timestamp with session data', function () {
 
     $pdo = null;
 });
+
+it('implements SessionUpdateTimestampHandlerInterface', function () {
+    expect($this->handler)->toBeInstanceOf(\SessionUpdateTimestampHandlerInterface::class);
+});
+
+it('validateId accepts valid ids', function () {
+    expect($this->handler->validateId('abc123'))->toBeTrue();
+    expect($this->handler->validateId('sess_' . uniqid()))->toBeTrue();
+    expect($this->handler->validateId('A-b_c,1'))->toBeTrue();
+});
+
+it('validateId rejects invalid ids', function () {
+    expect($this->handler->validateId(''))->toBeFalse();
+    expect($this->handler->validateId('id with spaces'))->toBeFalse();
+    expect($this->handler->validateId('id@special'))->toBeFalse();
+    expect($this->handler->validateId(str_repeat('a', 129)))->toBeFalse();
+});
+
+it('updateTimestamp updates only timestamp without changing data', function () {
+    $id = 'ts_update_' . uniqid();
+    $data = 'persistent_data';
+
+    $this->handler->write($id, $data);
+    $this->handler->close();
+
+    $before = time();
+    $result = $this->handler->updateTimestamp($id, $data);
+    $after = time();
+
+    expect($result)->toBeTrue();
+
+    $dbFile = $this->tempDir . '/session.sqlite';
+    $pdo = new PDO('sqlite:' . $dbFile);
+    $stmt = $pdo->prepare("SELECT data, timestamp FROM sessions WHERE id = :id");
+    $stmt->execute(['id' => $id]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    expect($row['data'])->toBe($data);
+    expect((int) $row['timestamp'])->toBeGreaterThanOrEqual($before);
+    expect((int) $row['timestamp'])->toBeLessThanOrEqual($after);
+
+    $this->handler->destroy($id);
+    $pdo = null;
+});
+
+it('updateTimestamp returns false for nonexistent session', function () {
+    $result = $this->handler->updateTimestamp('nonexistent_id', 'data');
+
+    expect($result)->toBeTrue();
+});

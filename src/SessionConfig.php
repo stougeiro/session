@@ -2,7 +2,7 @@
 
     namespace STDW\Session;
 
-    use STDW\Session\Spec\SessionConfigInterface;
+    use STDW\Contract\Session\SessionConfigInterface;
 
 
     class SessionConfig implements SessionConfigInterface
@@ -19,15 +19,31 @@
          */
         protected string $storage;
 
-        /** @var array{lifetime: int, same_site: 'Lax'|'Strict'|'None'} 
+        /** @var int
          */
-        protected array $cookie;
+        protected int $cookieLifetime;
 
-        /** @var array{maxlifetime: int, probability: int, divisor: int}
+        /** @var string
          */
-        protected array $gc;
+        protected string $cookieSameSite;
 
-        /** @var array{regeneration: bool, regeneration_time: int}
+        /** @var int
+         */
+        protected int $gcMaxLifetime;
+
+        /** @var int
+         */
+        protected int $gcProbability;
+
+        /** @var int
+         */
+        protected int $gcDivisor;
+
+        /** @var int
+         */
+        protected int $guardRegenerationTime;
+
+        /** @var array<string, mixed>
          */
         protected array $extra;
 
@@ -39,8 +55,9 @@
          *    storage?: string,
          *    cookie?: array{lifetime?: int, same_site?: 'Lax'|'Strict'|'None'},
          *    garbage_collector?: array{maxlifetime?: int, probability?: int, divisor?: int},
-         *    extra?: array{regeneration?: bool, regeneration_time?: int}
-         * } $config 
+         *    guard?: array{regeneration?: bool, regeneration_time?: int},
+         *    extra?: array<string, mixed>
+         * } $config
          */
         public function __construct(array $config)
         {
@@ -60,10 +77,11 @@
                     'divisor' => 100,
                 ],
 
-                'extra' => [
-                    'regeneration' => false,
+                'guard' => [
                     'regeneration_time' => 600,
                 ],
+
+                'extra' => [],
             ];
 
             $config = array_replace_recursive($defaults, $config);
@@ -72,60 +90,83 @@
             $this->name = $this->validateName($config['name']);
             $this->storage = $this->validateStorage($config['storage']);
 
-            $this->cookie = [
-                'lifetime' => $this->validateInt($config['cookie']['lifetime'], min: 0, max: 604800),
-                'same_site' => $this->validateSameSite($config['cookie']['same_site']),
-            ];
+            $this->cookieLifetime = $this->validateInt($config['cookie']['lifetime'], min: 0, max: 604800);
+            $this->cookieSameSite = $this->validateSameSite($config['cookie']['same_site']);
 
-            $this->gc = [
-                'maxlifetime' => $this->validateInt($config['garbage_collector']['maxlifetime'], min: 1, max: 1800),
-                'probability' => $this->validateInt($config['garbage_collector']['probability'], min: 1, max: 100),
-                'divisor' => $this->validateInt($config['garbage_collector']['divisor'], min: 1, max: 100),
-            ];
+            $this->gcMaxLifetime = $this->validateInt($config['garbage_collector']['maxlifetime'], min: 1, max: 1800);
+            $this->gcProbability = $this->validateInt($config['garbage_collector']['probability'], min: 1, max: 100);
+            $this->gcDivisor = $this->validateInt($config['garbage_collector']['divisor'], min: 1, max: 100);
 
-            $this->extra = [
-                'regeneration' => $this->validateBool($config['extra']['regeneration']),
-                'regeneration_time' => $this->validateInt($config['extra']['regeneration_time'], min: 1, max: 900),
-            ];
+            $this->guardRegenerationTime = $this->validateInt($config['guard']['regeneration_time'], min: 1, max: 900);
+
+            $this->extra = $config['extra'];
         }
 
 
-        /** @return string 
+        /** @return string
          */
         public function handler(): string
         {
             return $this->handler;
         }
 
-        /** @return string 
+        /** @return string
          */
         public function name(): string
         {
             return $this->name;
         }
 
-        /** @return string 
+        /** @return string
          */
         public function storage(): string
         {
             return $this->storage;
         }
 
-        /** @return array{lifetime: int, same_site: 'Lax'|'Strict'|'None'} 
+        /** @return int
          */
-        public function cookie(): array
+        public function cookieLifetime(): int
         {
-            return $this->cookie;
+            return $this->cookieLifetime;
         }
 
-        /** @return array{maxlifetime: int, probability: int, divisor: int}
+        /** @return 'Lax'|'Strict'|'None'
          */
-        public function gc(): array
+        public function cookieSameSite(): string
         {
-            return $this->gc;
+            return $this->cookieSameSite;
         }
 
-        /** @return array{regeneration: bool, regeneration_time: int}
+        /** @return int
+         */
+        public function gcMaxLifetime(): int
+        {
+            return $this->gcMaxLifetime;
+        }
+
+        /** @return int
+         */
+        public function gcProbability(): int
+        {
+            return $this->gcProbability;
+        }
+
+        /** @return int
+         */
+        public function gcDivisor(): int
+        {
+            return $this->gcDivisor;
+        }
+
+        /** @return int
+         */
+        public function guardRegenerationTime(): int
+        {
+            return $this->guardRegenerationTime;
+        }
+
+        /** @return array<string, mixed>
          */
         public function extra(): array
         {
@@ -186,15 +227,6 @@
             }
 
             return $value;
-        }
-
-        /**
-         * @param mixed $value 
-         * @return bool 
-         */
-        protected function validateBool(mixed $value): bool
-        {
-            return filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? false;
         }
 
         /**

@@ -3,14 +3,38 @@
     namespace STDW\Session\Handler;
 
     use PDO;
+    use PDOStatement;
+    use RuntimeException;
     use SessionHandlerInterface;
+    use SessionUpdateTimestampHandlerInterface;
 
 
-    class SqliteSessionHandler implements SessionHandlerInterface
+    class SqliteSessionHandler implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface
     {
         /** @var PDO
          */
         protected PDO $pdo;
+
+        /** @var PDOStatement
+         */
+        protected PDOStatement $stmtRead;
+
+        /** @var PDOStatement
+         */
+        protected PDOStatement $stmtInsert;
+
+        /** @var PDOStatement
+         */
+        protected PDOStatement $stmtDelete;
+
+        /** @var PDOStatement
+         */
+        protected PDOStatement $stmtDeleteExpired;
+
+        /** @var PDOStatement
+         */
+        protected PDOStatement $stmtUpdate;
+
 
         /** @var string
          */
@@ -25,11 +49,17 @@
         protected array $pending = [];
 
 
-        /** @param string $path 
+        /** @param string $storage 
          */
-        public function __construct(string $path)
+        public function __construct(string $storage)
         {
-            $database = rtrim($path, '/') . '/session.sqlite';
+            $dir = rtrim($storage, '/');
+
+            if ( ! is_dir($dir) && ! mkdir($dir, 0700, true)) {
+                throw new RuntimeException("Failed to create session storage directory: {$dir}");
+            }
+
+            $database = $dir . '/session.sqlite';
 
             if ( ! file_exists($database)) {
                 touch($database);
@@ -48,6 +78,7 @@
             $this->pdo->exec("PRAGMA foreign_keys = OFF");
 
             $this->createTable();
+            $this->prepareStatements();
         }
 
 
@@ -71,17 +102,13 @@
                 return $this->cache[$id];
             }
 
-            $stmt = $this->pdo->prepare("
-                SELECT data FROM {$this->table}
-                WHERE id = :id
-                LIMIT 1");
+            $this->stmtRead->closeCursor();
+            $this->stmtRead->execute(['id' => $id]);
 
-            $stmt->execute(['id' => $id]);
-
-            $data = $stmt->fetchColumn();
+            $data = $this->stmtRead->fetchColumn();
 
             if ($data === false) {
-                return false;
+                return '';
             }
 
             $this->cache[$id] = (string) $data;
@@ -110,14 +137,10 @@
         {
             $limit = time() - $max_lifetime;
 
-            $stmt = $this->pdo->prepare("
-                DELETE FROM {$this->table}
-                WHERE timestamp < :limit
-            ");
+            $this->stmtDeleteExpired->closeCursor();
+            $this->stmtDeleteExpired->execute(['limit' => $limit]);
 
-            $stmt->execute(['limit' => $limit]);
-
-            return $stmt->rowCount();
+            return $this->stmtDeleteExpired->rowCount();
         }
 
         /** @return bool 
@@ -128,18 +151,14 @@
                 return true;
             }
 
-            $stmt = $this->pdo->prepare("
-                INSERT OR REPLACE INTO {$this->table} (id, data, timestamp)
-                VALUES (:id, :data, :timestamp)
-            ");
-
+            $this->stmtInsert->closeCursor();
             $timestamp = time();
 
             foreach ($this->pending as $id => $data) {
-                $stmt->execute([
+                $this->stmtInsert->execute([
                     'id'        => $id,
                     'data'      => $data,
-                    'timestamp' => $timestamp
+                    'timestamp' => $timestamp,
                 ]);
             }
 
@@ -155,13 +174,33 @@
         public function destroy(string $id): bool
         {
             unset($this->cache[$id], $this->pending[$id]);
+            $this->stmtDelete->closeCursor();
 
-            $stmt = $this->pdo->prepare("
-                DELETE FROM {$this->table}
-                WHERE id = :id
-            ");
+            return $this->stmtDelete->execute(['id' => $id]);
+        }
 
-            return $stmt->execute(['id' => $id]);
+        /**
+         * @param string $id
+         * @return bool
+         */
+        public function validateId(string $id): bool
+        {
+            return preg_match('/^[a-zA-Z0-9,-]{1,128}$/', $id) === 1;
+        }
+
+        /**
+         * @param string $id
+         * @param string $data
+         * @return bool
+         */
+        public function updateTimestamp(string $id, string $data): bool
+        {
+            $this->stmtUpdate->closeCursor();
+
+            return $this->stmtUpdate->execute([
+                'id'        => $id,
+                'timestamp' => time(),
+            ]);
         }
 
 
@@ -183,5 +222,30 @@
                 CREATE INDEX IF NOT EXISTS {$this->table}_timestamp_idx
                 ON {$this->table} (timestamp)
             ");
+        }
+
+        /** @return void 
+         */
+        protected function prepareStatements(): void
+        {
+            $this->stmtRead = $this->pdo->prepare(
+                "SELECT data FROM {$this->table} WHERE id = :id LIMIT 1"
+            );
+
+            $this->stmtInsert = $this->pdo->prepare(
+                "INSERT OR REPLACE INTO {$this->table} (id, data, timestamp) VALUES (:id, :data, :timestamp)"
+            );
+
+            $this->stmtDelete = $this->pdo->prepare(
+                "DELETE FROM {$this->table} WHERE id = :id"
+            );
+
+            $this->stmtDeleteExpired = $this->pdo->prepare(
+                "DELETE FROM {$this->table} WHERE timestamp < :limit"
+            );
+
+            $this->stmtUpdate = $this->pdo->prepare(
+                "UPDATE {$this->table} SET timestamp = :timestamp WHERE id = :id"
+            );
         }
     }

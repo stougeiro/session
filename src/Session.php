@@ -3,7 +3,7 @@
     namespace STDW\Session;
 
     use STDW\Contract\Session\SessionInterface;
-    use STDW\Session\Spec\SessionConfigInterface;
+    use STDW\Contract\Session\SessionConfigInterface;
     use STDW\Session\Handler\FileSessionHandler;
     use STDW\Session\Handler\SqliteSessionHandler;
 
@@ -173,16 +173,13 @@
             $name = $this->config->name();
             $storage = $this->config->storage();
 
-            /** @var array{maxlifetime: int, probability: int, divisor: int} $gc */
-            $gc = $this->config->gc();
-
             ini_set('session.name', $name);
 
             ini_set('session.save_path', $storage);
 
-            ini_set('session.gc_maxlifetime', $gc['maxlifetime']);
-            ini_set('session.gc_probability', $gc['probability']);
-            ini_set('session.gc_divisor', $gc['divisor']);
+            ini_set('session.gc_maxlifetime', $this->config->gcMaxLifetime());
+            ini_set('session.gc_probability', $this->config->gcProbability());
+            ini_set('session.gc_divisor', $this->config->gcDivisor());
 
             ini_set('session.use_strict_mode', '1');
             ini_set('session.use_cookies', '1');
@@ -196,16 +193,13 @@
          */
         protected function applyCookieSettings(): void
         {
-            /** @var array{lifetime: int, same_site: 'Lax'|'Strict'|'None'} $cookie */
-            $cookie = $this->config->cookie();
-
             session_set_cookie_params([
-                'lifetime' => $cookie['lifetime'],
+                'lifetime' => $this->config->cookieLifetime(),
                 'path'     => '/',
                 'domain'   => '',
                 'secure'   => $this->isHttps(),
                 'httponly' => true,
-                'samesite' => $this->resolveSameSite($cookie['same_site']),
+                'samesite' => $this->resolveSameSite($this->config->cookieSameSite()),
             ]);
         }
 
@@ -242,7 +236,7 @@
         {
             $now = time();
             $last = $this->getLastActivity();
-            $timeout = $this->config->gc()['maxlifetime'];
+            $timeout = $this->config->gcMaxLifetime();
 
             if (($now - $last) > $timeout) {
                 $this->doSessionDestroy();
@@ -256,16 +250,10 @@
          */
         protected function handleRegeneration(): void
         {
-            $extra = $this->config->extra();
-
-            if ( ! $extra['regeneration']) {
-                return;
-            }
-
             $now = time();
             $last = $this->getLastRegeneration();
 
-            if (($now - $last) > $extra['regeneration_time']) {
+            if (($now - $last) > $this->config->guardRegenerationTime()) {
                 $this->doSessionRegenerateId();
                 $this->setLastRegeneration($now);
             }
@@ -325,7 +313,7 @@
 
         /** @return int 
          */
-        public function getLastActivity(): int
+        protected function getLastActivity(): int
         {
             $last = $_SESSION['_last_activity_'] ?? 0;
 
@@ -344,14 +332,14 @@
          * @param int $time 
          * @return void 
          */
-        public function setLastActivity(int $time): void
+        protected function setLastActivity(int $time): void
         {
             $_SESSION['_last_activity_'] = $time;
         }
 
         /** @return int 
          */
-        public function getLastRegeneration(): int
+        protected function getLastRegeneration(): int
         {
             $last = $_SESSION['_last_regeneration_'] ?? 0;
 
@@ -370,7 +358,7 @@
          * @param int $time 
          * @return void 
          */
-        public function setLastRegeneration(int $time): void
+        protected function setLastRegeneration(int $time): void
         {
             $_SESSION['_last_regeneration_'] = $time;
         }

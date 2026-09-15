@@ -23,11 +23,11 @@
         protected array $pending = [];
 
 
-        /** @param string $path 
+        /** @param string $storage 
          */
-        public function __construct(string $path)
+        public function __construct(string $storage)
         {
-            $this->path = rtrim($path, '/');
+            $this->path = rtrim($storage, '/');
 
             if ( ! is_dir($this->path) && ! mkdir($this->path, 0700, true)) {
                 throw new RuntimeException("Failed to create session storage directory: {$this->path}");
