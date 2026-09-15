@@ -46,7 +46,7 @@
     },
     "require": {
         "php": ">=8.2",
-        "stougeiro/session-contract": "^3.0"
+        "stougeiro/session-contract": "^4.0"
     },
     "autoload-dev": {
         "psr-4": {
