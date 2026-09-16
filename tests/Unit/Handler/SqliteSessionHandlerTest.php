@@ -261,6 +261,7 @@ it('validateId accepts valid ids', function () {
     expect($this->handler->validateId('abc123'))->toBeTrue();
     expect($this->handler->validateId('sess-' . uniqid()))->toBeTrue();
     expect($this->handler->validateId('A-b-c,1'))->toBeTrue();
+    expect($this->handler->validateId('A-b_c,1'))->toBeTrue();
 });
 
 it('validateId rejects invalid ids', function () {

@@ -30,7 +30,7 @@
             $this->path = rtrim($storage, '/');
 
             if ( ! is_dir($this->path) && ! mkdir($this->path, 0700, true)) {
-                throw new RuntimeException("Failed to create session storage directory: {$this->path}");
+                throw new RuntimeException("Failed to create session storage directory");
             }
         }
 
@@ -51,6 +51,10 @@
          */
         public function read(string $id): string|false
         {
+            if ( ! $this->validateId($id)) {
+                return false;
+            }
+
             if (isset($this->cache[$id])) {
                 return $this->cache[$id];
             }
@@ -74,6 +78,10 @@
          */
         public function write(string $id, string $data): bool
         {
+            if ( ! $this->validateId($id)) {
+                return false;
+            }
+
             $this->cache[$id] = $data;
             $this->pending[$id] = $data;
 
@@ -112,7 +120,11 @@
             }
            
             foreach ($this->pending as $id => $data) {
-                file_put_contents($this->filePath($id), $data, LOCK_EX);
+                if (file_put_contents($this->filePath($id), $data, LOCK_EX) === false) {
+                    $this->pending = [];
+
+                    return false;
+                }
             }
 
             $this->pending = [];
@@ -126,6 +138,10 @@
          */
         public function destroy(string $id): bool
         {
+            if ( ! $this->validateId($id)) {
+                return false;
+            }
+
             unset($this->cache[$id], $this->pending[$id]);
 
             $file = $this->filePath($id);
@@ -143,7 +159,7 @@
          */
         public function validateId(string $id): bool
         {
-            return preg_match('/^[a-zA-Z0-9,-]{1,128}$/', $id) === 1;
+            return preg_match('/^[a-zA-Z0-9,_-]{1,128}$/', $id) === 1;
         }
 
         /**
@@ -153,6 +169,10 @@
          */
         public function updateTimestamp(string $id, string $data): bool
         {
+            if ( ! $this->validateId($id)) {
+                return false;
+            }
+
             $file = $this->filePath($id);
 
             if (is_file($file)) {

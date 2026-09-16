@@ -56,7 +56,7 @@
             $dir = rtrim($storage, '/');
 
             if ( ! is_dir($dir) && ! mkdir($dir, 0700, true)) {
-                throw new RuntimeException("Failed to create session storage directory: {$dir}");
+                throw new RuntimeException("Failed to create session storage directory");
             }
 
             $database = $dir . '/session.sqlite';
@@ -66,7 +66,7 @@
             }
 
             $this->pdo = new PDO('sqlite:' . $database);
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
             $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
             $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
@@ -98,12 +98,19 @@
          */
         public function read(string $id): string|false
         {
+            if ( ! $this->validateId($id)) {
+                return false;
+            }
+
             if (isset($this->cache[$id])) {
                 return $this->cache[$id];
             }
 
             $this->stmtRead->closeCursor();
-            $this->stmtRead->execute(['id' => $id]);
+
+            if ( ! $this->stmtRead->execute(['id' => $id])) {
+                return false;
+            }
 
             $data = $this->stmtRead->fetchColumn();
 
@@ -123,6 +130,10 @@
          */
         public function write(string $id, string $data): bool
         {
+            if ( ! $this->validateId($id)) {
+                return false;
+            }
+
             $this->cache[$id] = $data;
             $this->pending[$id] = $data;
 
@@ -138,7 +149,10 @@
             $limit = time() - $max_lifetime;
 
             $this->stmtDeleteExpired->closeCursor();
-            $this->stmtDeleteExpired->execute(['limit' => $limit]);
+
+            if ( ! $this->stmtDeleteExpired->execute(['limit' => $limit])) {
+                return false;
+            }
 
             return $this->stmtDeleteExpired->rowCount();
         }
@@ -151,15 +165,27 @@
                 return true;
             }
 
+            if ( ! $this->pdo->beginTransaction()) {
+                return false;
+            }
+
             $this->stmtInsert->closeCursor();
             $timestamp = time();
 
             foreach ($this->pending as $id => $data) {
-                $this->stmtInsert->execute([
+                if ( ! $this->stmtInsert->execute([
                     'id'        => $id,
                     'data'      => $data,
                     'timestamp' => $timestamp,
-                ]);
+                ])) {
+                    $this->pdo->rollBack();
+
+                    return false;
+                }
+            }
+
+            if ( ! $this->pdo->commit()) {
+                return false;
             }
 
             $this->pending = [];
@@ -173,7 +199,12 @@
          */
         public function destroy(string $id): bool
         {
+            if ( ! $this->validateId($id)) {
+                return false;
+            }
+
             unset($this->cache[$id], $this->pending[$id]);
+
             $this->stmtDelete->closeCursor();
 
             return $this->stmtDelete->execute(['id' => $id]);
@@ -185,7 +216,7 @@
          */
         public function validateId(string $id): bool
         {
-            return preg_match('/^[a-zA-Z0-9,-]{1,128}$/', $id) === 1;
+            return preg_match('/^[a-zA-Z0-9,_-]{1,128}$/', $id) === 1;
         }
 
         /**
@@ -195,6 +226,10 @@
          */
         public function updateTimestamp(string $id, string $data): bool
         {
+            if ( ! $this->validateId($id)) {
+                return false;
+            }
+
             $this->stmtUpdate->closeCursor();
 
             return $this->stmtUpdate->execute([

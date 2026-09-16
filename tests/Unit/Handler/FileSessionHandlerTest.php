@@ -230,6 +230,7 @@ it('stores sessions with correct file naming', function () {
 it('validateId returns true for valid ID', function () {
     expect($this->handler->validateId('abc123'))->toBeTrue();
     expect($this->handler->validateId('a-b-c-d'))->toBeTrue();
+    expect($this->handler->validateId('a_b_c'))->toBeTrue();
     expect($this->handler->validateId('1234567890'))->toBeTrue();
     expect($this->handler->validateId('A1B2C3'))->toBeTrue();
 });
